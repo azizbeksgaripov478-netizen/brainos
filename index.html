@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainOS AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">BrainOS</div>
+        <ul>
+            <li onclick="scrollTo('hero')">Bosh sahifa</li>
+            <li onclick="scrollTo('features')">Imkoniyatlar</li>
+            <li onclick="scrollTo('notes-section')">Notes</li>
+            <li onclick="scrollTo('chat-section')">AI</li>
+            <li onclick="scrollTo('contact')">Aloqa</li>
+        </ul>
+        <button id="theme-toggle">🌙</button>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-badge">🚀 O'zbekiston #1 AI Platformasi</div>
+            <h1>BrainOS AI</h1>
+            <p>Shaxsiy sun'iy intellekt yordamchingiz.<br>Jismoniy va yuridik shaxslar uchun.</p>
+            <div class="hero-buttons">
+                <button class="hero-btn" onclick="scrollTo('chat-section')">Boshlash →</button>
+                <button class="hero-btn-outline" onclick="scrollTo('features')">Batafsil</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-num">24/7</span>
+                    <span class="stat-label">Ishlaydi</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-num">O'zbek</span>
+                    <span class="stat-label">Til</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-num">AI</span>
+                    <span class="stat-label">Powered</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <div class="section-title">
+            <h2>Nima qila oladi?</h2>
+            <p>BrainOS sizning hayotingizni osonlashtiradi</p>
+        </div>
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <h3>AI Suhbat</h3>
+                <p>O'zbek tilida aqlli va tez javoblar.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📝</div>
+                <h3>Aqlli Notes</h3>
+                <p>Yozuvlaringizni saqlang, AI tahlil qilsin.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🧠</div>
+                <h3>Xotira tizimi</h3>
+                <p>AI oldingi suhbatlarni eslab qoladi.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏢</div>
+                <h3>Biznes uchun</h3>
+                <p>Korxonangiz uchun maxsus AI yordamchi.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔒</div>
+                <h3>Xavfsiz</h3>
+                <p>Ma'lumotlaringiz himoyalangan.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌐</div>
+                <h3>Ko'p til</h3>
+                <p>O'zbek, Rus, Ingliz tillarida ishlaydi.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHO IS IT FOR -->
+    <section class="for-section">
+        <div class="section-title">
+            <h2>Kim uchun?</h2>
+            <p>Har kim uchun moslashtirilgan yechim</p>
+        </div>
+        <div class="for-cards">
+            <div class="for-card">
+                <div class="for-icon">👤</div>
+                <h3>Jismoniy shaxslar</h3>
+                <ul class="for-list">
+                    <li>✅ Kundalik savollar</li>
+                    <li>✅ Hujjat tayyorlash</li>
+                    <li>✅ O'rganish va rivojlanish</li>
+                    <li>✅ Rejalashtirish</li>
+                </ul>
+                <button class="for-btn" onclick="scrollTo('chat-section')">Boshlash</button>
+            </div>
+            <div class="for-card featured">
+                <div class="featured-badge">Mashhur</div>
+                <div class="for-icon">🏢</div>
+                <h3>Yuridik shaxslar</h3>
+                <ul class="for-list">
+                    <li>✅ Korporativ AI</li>
+                    <li>✅ Shartnoma tahlili</li>
+                    <li>✅ Hisobot yaratish</li>
+                    <li>✅ Mijozlarga xizmat</li>
+                </ul>
+                <button class="for-btn" onclick="scrollTo('auth-section')">Ro'yxatdan o'tish</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- AUTH -->
+    <section class="auth" id="auth-section">
+        <div class="section-title">
+            <h2>Kirish</h2>
+            <p>Shaxsiy akkauntingiz orqali kiring</p>
+        </div>
+        <div class="auth-box">
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Kirish</button>
+                <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Ro'yxatdan o'tish</button>
+            </div>
+            <input type="email" id="email" placeholder="Email manzilingiz" autocomplete="off">
+            <input type="password" id="password" placeholder="Parolingiz" autocomplete="off">
+            <div class="auth-buttons">
+                <button id="signup" style="display:none">Ro'yxatdan o'tish</button>
+                <button id="login">Kirish</button>
+            </div>
+            <p class="auth-note">Akkaunt yaratmasdan ham AI dan foydalanishingiz mumkin</p>
+        </div>
+    </section>
+
+    <!-- ========================== -->
+    <!-- NOTES SECTION              -->
+    <!-- ========================== -->
+    <section class="notes-section" id="notes-section">
+
+        <div class="section-title">
+            <h2>📝 Mening Notes larim</h2>
+            <p>Fikrlaringizni yozing, AI tahlil qilsin</p>
+        </div>
+
+        <!-- NOTE YARATISH -->
+        <div class="note-form">
+
+            <div class="note-form-top">
+                <input
+                    type="text"
+                    id="note-title"
+                    placeholder="Sarlavha..."
+                    autocomplete="off"
+                >
+                <select id="note-category">
+                    <option value="general">📌 Umumiy</option>
+                    <option value="work">💼 Ish</option>
+                    <option value="study">📚 O'qish</option>
+                    <option value="personal">👤 Shaxsiy</option>
+                    <option value="idea">💡 G'oya</option>
+                </select>
+            </div>
+
+            <textarea
+                id="note-content"
+                placeholder="Yozuvingizni kiriting..."
+                rows="4"
+            ></textarea>
+
+            <div class="note-form-buttons">
+                <button id="note-save">💾 Saqlash</button>
+                <button id="note-ai-analyze">🤖 AI Tahlil</button>
+            </div>
+
+        </div>
+
+        <!-- AI TAHLIL NATIJASI -->
+        <div class="note-ai-result" id="note-ai-result" style="display:none">
+            <h3>🤖 AI Tahlili:</h3>
+            <p id="note-ai-text"></p>
+        </div>
+
+        <!-- KATEGORIYA FILTER -->
+        <div class="notes-filter">
+            <button class="filter-btn active" onclick="filterNotes('all')">Hammasi</button>
+            <button class="filter-btn" onclick="filterNotes('work')">💼 Ish</button>
+            <button class="filter-btn" onclick="filterNotes('study')">📚 O'qish</button>
+            <button class="filter-btn" onclick="filterNotes('personal')">👤 Shaxsiy</button>
+            <button class="filter-btn" onclick="filterNotes('idea')">💡 G'oya</button>
+        </div>
+
+        <!-- NOTES RO'YXATI -->
+        <div class="notes-list" id="notes-list">
+            <div class="notes-empty">
+                <span>📝</span>
+                <p>Hozircha notes yo'q. Birinchi yozuvingizni qo'shing!</p>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- CHAT -->
+    <section class="chat-section" id="chat-section">
+        <div class="section-title">
+            <h2>🤖 BrainOS Assistant</h2>
+            <p>O'zbek tilida aqlli yordamchingiz</p>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <div class="message bot">
+                Assalomu alaykum! 👋 Men BrainOS AI yordamchisiman. Bugun sizga qanday yordam bera olaman?
+            </div>
+        </div>
+        <div class="chat-input">
+            <input id="input" type="text" placeholder="Savolingizni yozing..." autocomplete="off">
+            <button id="button">Yuborish</button>
+        </div>
+        <button id="clear">🗑️ Chatni tozalash</button>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact-section" id="contact">
+        <div class="section-title">
+            <h2>Aloqa</h2>
+            <p>Savol yoki takliflaringiz bo'lsa, bog'laning</p>
+        </div>
+        <div class="contact-cards">
+            <div class="contact-card">
+                <span>📧</span>
+                <p>info@brainos.uz</p>
+            </div>
+            <div class="contact-card">
+                <span>📱</span>
+                <p>Telegram: @brainos_uz</p>
+            </div>
+            <div class="contact-card">
+                <span>📍</span>
+                <p>Toshkent, O'zbekiston</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <div class="logo">BrainOS</div>
+            <p>© 2025 BrainOS AI. Barcha huquqlar himoyalangan.</p>
+            <div class="footer-links">
+                <span>Maxfiylik</span>
+                <span>Shartlar</span>
+                <span>Yordam</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+
+    <script>
+        function scrollTo(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function switchTab(tab) {
+            const loginBtn = document.getElementById('login');
+            const signupBtn = document.getElementById('signup');
+            const tabLogin = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            if (tab === 'login') {
+                loginBtn.style.display = 'block';
+                signupBtn.style.display = 'none';
+                tabLogin.classList.add('active');
+                tabSignup.classList.remove('active');
+            } else {
+                loginBtn.style.display = 'none';
+                signupBtn.style.display = 'block';
+                tabLogin.classList.remove('active');
+                tabSignup.classList.add('active');
+            }
+        }
+
+        function filterNotes(category) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const cards = document.querySelectorAll('.note-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
