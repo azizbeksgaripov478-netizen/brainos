@@ -94,15 +94,11 @@ const server = http.createServer(async (req, res) => {
     else if (req.url === "/signup" && req.method === "POST") {
         try {
             const { email, password } = await parseBody(req);
-
             if (!email || !password) return respond(400, "Email va password kiriting ⚠️");
             if (password.length < 6) return respond(400, "Password kamida 6 ta belgi bo'lsin ⚠️");
-
             const { error } = await supabase.auth.signUp({ email, password });
-
             if (error) return respond(400, "Xato: " + error.message + " ❌");
             respond(200, "Account yaratildi! Emailni tasdiqlang ✅");
-
         } catch { respond(500, "Server xato ❌"); }
     }
 
@@ -113,14 +109,10 @@ const server = http.createServer(async (req, res) => {
     else if (req.url === "/login" && req.method === "POST") {
         try {
             const { email, password } = await parseBody(req);
-
             if (!email || !password) return respond(400, "Email va password kiriting ⚠️");
-
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
             if (error) return respond(400, "Xato: " + error.message + " ❌");
             respond(200, { message: "Xush kelibsiz! ✅", userId: data.user.id, email: data.user.email }, true);
-
         } catch { respond(500, "Server xato ❌"); }
     }
 
@@ -131,7 +123,6 @@ const server = http.createServer(async (req, res) => {
     else if (req.url === "/chat" && req.method === "POST") {
         try {
             const { text, userId } = await parseBody(req);
-
             if (!text) return respond(400, "Xabar bo'sh ⚠️");
 
             const sessionId = userId || "guest";
@@ -173,92 +164,19 @@ const server = http.createServer(async (req, res) => {
         try {
             const { userId } = await parseBody(req);
             const sessionId = userId || "guest";
-
-            const { error } = await supabase
-                .from("conversations")
-                .delete()
-                .eq("user_id", sessionId);
-
+            const { error } = await supabase.from("conversations").delete().eq("user_id", sessionId);
             if (error) return respond(500, "O'chirish xato ❌");
             respond(200, "Suhbat tozalandi ✅");
-
         } catch { respond(500, "Xato ❌"); }
     }
 
     // ==========================
-    // NOTES — OLISH
-    // ==========================
-
-    else if (req.url.startsWith("/notes") && req.method === "GET") {
-        try {
-            const userId = req.url.split("?userId=")[1] || "guest";
-
-            const { data, error } = await supabase
-                .from("notes")
-                .select("*")
-                .eq("user_id", userId)
-                .order("created_at", { ascending: false });
-
-            if (error) return respond(500, "Noteslarni olishda xato ❌");
-            respond(200, data, true);
-
-        } catch { respond(500, "Xato ❌"); }
-    }
-
-    // ==========================
-    // NOTES — YARATISH
-    // ==========================
-
-    else if (req.url === "/notes" && req.method === "POST") {
-        try {
-            const { userId, title, content, category } = await parseBody(req);
-
-            if (!title || !content) return respond(400, "Sarlavha va matn kiriting ⚠️");
-
-            const { data, error } = await supabase
-                .from("notes")
-                .insert({
-                    user_id: userId || "guest",
-                    title,
-                    content,
-                    category: category || "general"
-                })
-                .select()
-                .single();
-
-            if (error) return respond(500, "Saqlashda xato ❌");
-            respond(200, data, true);
-
-        } catch { respond(500, "Xato ❌"); }
-    }
-
-    // ==========================
-    // NOTES — O'CHIRISH
-    // ==========================
-
-    else if (req.url.startsWith("/notes/") && req.method === "DELETE") {
-        try {
-            const noteId = req.url.split("/notes/")[1];
-
-            const { error } = await supabase
-                .from("notes")
-                .delete()
-                .eq("id", noteId);
-
-            if (error) return respond(500, "O'chirishda xato ❌");
-            respond(200, "Note o'chirildi ✅");
-
-        } catch { respond(500, "Xato ❌"); }
-    }
-
-    // ==========================
-    // NOTES — AI TAHLIL
+    // NOTES — AI TAHLIL (birinchi!)
     // ==========================
 
     else if (req.url === "/notes/analyze" && req.method === "POST") {
         try {
-            const { content, userId } = await parseBody(req);
-
+            const { content } = await parseBody(req);
             if (!content) return respond(400, "Matn kiriting ⚠️");
 
             const completion = await groq.chat.completions.create({
@@ -280,6 +198,65 @@ const server = http.createServer(async (req, res) => {
             respond(200, reply);
 
         } catch { respond(500, "AI tahlil qila olmadi ❌"); }
+    }
+
+    // ==========================
+    // NOTES — O'CHIRISH
+    // ==========================
+
+    else if (req.url.startsWith("/notes/") && req.method === "DELETE") {
+        try {
+            const noteId = req.url.split("/notes/")[1];
+            const { error } = await supabase.from("notes").delete().eq("id", noteId);
+            if (error) return respond(500, "O'chirishda xato ❌");
+            respond(200, "Note o'chirildi ✅");
+        } catch { respond(500, "Xato ❌"); }
+    }
+
+    // ==========================
+    // NOTES — YARATISH
+    // ==========================
+
+    else if (req.url === "/notes" && req.method === "POST") {
+        try {
+            const { userId, title, content, category } = await parseBody(req);
+            if (!title || !content) return respond(400, "Sarlavha va matn kiriting ⚠️");
+
+            const { data, error } = await supabase
+                .from("notes")
+                .insert({
+                    user_id: userId || "guest",
+                    title,
+                    content,
+                    category: category || "general"
+                })
+                .select()
+                .single();
+
+            if (error) return respond(500, "Saqlashda xato ❌");
+            respond(200, data, true);
+
+        } catch { respond(500, "Xato ❌"); }
+    }
+
+    // ==========================
+    // NOTES — OLISH (oxirgi)
+    // ==========================
+
+    else if (req.url.startsWith("/notes") && req.method === "GET") {
+        try {
+            const userId = req.url.split("?userId=")[1] || "guest";
+
+            const { data, error } = await supabase
+                .from("notes")
+                .select("*")
+                .eq("user_id", userId)
+                .order("created_at", { ascending: false });
+
+            if (error) return respond(500, "Noteslarni olishda xato ❌");
+            respond(200, data, true);
+
+        } catch { respond(500, "Xato ❌"); }
     }
 
     // 404
