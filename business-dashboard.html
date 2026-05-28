@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — Biznes Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050A14;--bg2:#07101F;--surface:#0D1B33;--card:#0A172B;
+  --border:#162840;--border2:#1E3555;--accent:#2E7CF6;--accent2:#00D9A0;
+  --warn:#F6A32E;--danger:#F65C2E;--purple:#A064FF;
+  --text:#EFF4FF;--muted:#7A9BBF;--muted2:#3D5A7A;--sw:230px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.g1,.g2{position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+.g1{width:600px;height:600px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%);}
+.g2{width:450px;height:450px;bottom:-80px;right:-60px;background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%);}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;}
+.s-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.s-mark{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.s-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.s-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(46,124,246,0.2);color:#7AB3FF;font-weight:700;letter-spacing:0.5px;margin-left:2px;}
+.s-nav{flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px;}
+.s-sec{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px;}
+.s-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13.5px;transition:all 0.17s;position:relative;user-select:none;text-decoration:none;}
+.s-item:hover{background:rgba(46,124,246,0.07);color:var(--text);}
+.s-item.active{background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500;}
+.s-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 3px 3px 0;background:var(--accent);}
+.s-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.s-badge2{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;}
+.sb-b{background:rgba(46,124,246,0.25);color:#7AB3FF;}.sb-w{background:rgba(246,163,46,0.2);color:var(--warn);}
+.sb-r{background:rgba(246,92,46,0.2);color:var(--danger);}
+.s-user{padding:10px 8px;border-top:1px solid var(--border);}
+.u-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.17s;}
+.u-row:hover{background:rgba(255,255,255,0.04);}
+.u-av{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;}
+.u-nm{font-size:13px;font-weight:600;}.u-pl{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px;}
+.u-dt{width:5px;height:5px;border-radius:50%;background:var(--accent2);}.u-mo{margin-left:auto;color:var(--muted2);font-size:16px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+.topbar{height:56px;flex-shrink:0;padding:0 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);}
+.tb-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.tb-sp{flex:1;}
+.srch{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:6px 11px;width:200px;transition:all 0.2s;}
+.srch:focus-within{border-color:rgba(46,124,246,0.4);width:240px;}
+.srch input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%;}
+.srch input::placeholder{color:var(--muted2);}
+.tb-btn{width:34px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--muted);transition:all 0.17s;position:relative;flex-shrink:0;}
+.tb-btn:hover{border-color:var(--border2);color:var(--text);}
+.tb-btn.notif::after{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:2px solid var(--bg);}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px 28px;display:flex;flex-direction:column;gap:20px;}
+
+/* GREETING */
+.greet{background:linear-gradient(135deg,rgba(46,124,246,0.13),rgba(0,217,160,0.06));border:1px solid rgba(46,124,246,0.22);border-radius:16px;padding:22px 24px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;animation:fup 0.4s ease both;}
+.greet::after{content:'';position:absolute;right:-50px;top:-50px;width:220px;height:220px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(46,124,246,0.10),transparent 65%);}
+.gr-em{font-size:40px;flex-shrink:0;}
+.gr-tx h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:3px;}
+.gr-tx h2 span{background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.gr-tx p{font-size:13.5px;color:var(--muted);line-height:1.5;}
+.gr-bts{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.17s;white-space:nowrap;}
+.btn-p{background:linear-gradient(135deg,#2E7CF6,#1660D0);color:#fff;box-shadow:0 4px 14px rgba(46,124,246,0.28);}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(46,124,246,0.38);}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);}
+.btn-g:hover{color:var(--text);border-color:var(--muted2);}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;animation:fup 0.4s 0.07s ease both;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;transition:all 0.2s;position:relative;overflow:hidden;}
+.stat:hover{border-color:var(--border2);transform:translateY(-2px);}
+.st-lbl{font-size:11.5px;color:var(--muted);margin-bottom:9px;}
+.st-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:5px;}
+.st-chg{font-size:11.5px;font-weight:500;}
+.cup{color:var(--accent2);}.cdn{color:var(--danger);}.cnu{color:var(--muted);}
+.st-ic{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+
+/* GRIDS */
+.g-top{display:grid;grid-template-columns:1fr 1fr 320px;gap:16px;animation:fup 0.4s 0.14s ease both;}
+.g-mid{display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:fup 0.4s 0.21s ease both;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.c-hd{padding:15px 18px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.c-ic{font-size:15px;}
+.c-ttl{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;}
+.c-sub{font-size:11.5px;color:var(--muted);}
+.c-act{margin-left:auto;font-size:12px;color:var(--accent);cursor:pointer;font-weight:500;transition:opacity 0.17s;}
+.c-act:hover{opacity:0.7;}
+.c-bd{padding:14px 18px;}
+
+/* PROJECTS */
+.proj-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(22,40,64,0.5);cursor:pointer;transition:all 0.15s;border-radius:7px;}
+.proj-item:last-child{border-bottom:none;}
+.proj-item:hover{background:rgba(46,124,246,0.04);padding-left:6px;}
+.proj-color{width:4px;height:40px;border-radius:3px;flex-shrink:0;}
+.proj-body{flex:1;}
+.proj-name{font-size:13.5px;font-weight:600;margin-bottom:3px;}
+.proj-meta{display:flex;gap:8px;align-items:center;}
+.proj-tag{font-size:10.5px;padding:2px 7px;border-radius:5px;font-weight:600;}
+.proj-dead{font-size:11.5px;color:var(--muted);}
+.proj-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.proj-pct{font-size:12px;font-weight:700;}
+.proj-bar{width:80px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.proj-fill{height:100%;border-radius:2px;}
+.proj-team{display:flex;}
+.proj-av{width:20px;height:20px;border-radius:50%;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;margin-left:-5px;flex-shrink:0;}
+.proj-av:first-child{margin-left:0;}
+
+/* EMPLOYEES */
+.emp-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(22,40,64,0.5);}
+.emp-item:last-child{border-bottom:none;}
+.emp-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.emp-name{font-size:13px;font-weight:600;}
+.emp-role{font-size:11px;color:var(--muted2);}
+.emp-status{margin-left:auto;display:flex;align-items:center;gap:5px;}
+.emp-dot{width:7px;height:7px;border-radius:50%;}
+.emp-online{background:var(--accent2);}
+.emp-away{background:var(--warn);}
+.emp-offline{background:var(--muted2);}
+.emp-tasks{font-size:11px;color:var(--muted);}
+
+/* CLIENTS */
+.client-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(22,40,64,0.5);cursor:pointer;transition:all 0.15s;}
+.client-item:last-child{border-bottom:none;}
+.client-item:hover{padding-left:4px;}
+.client-logo{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.client-name{font-size:13px;font-weight:600;margin-bottom:1px;}
+.client-type{font-size:11px;color:var(--muted2);}
+.client-right{margin-left:auto;text-align:right;}
+.client-val{font-size:13px;font-weight:700;color:var(--accent2);}
+.client-status{font-size:11px;}
+
+/* REVENUE CHART */
+.rev-chart{padding:16px 18px 10px;}
+.rev-bars{display:flex;align-items:flex-end;gap:6px;height:100px;margin-bottom:8px;}
+.rev-bar-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;}
+.rev-bar-inner{width:100%;flex:1;display:flex;align-items:flex-end;}
+.rev-bar{width:100%;border-radius:4px 4px 0 0;transition:height 0.8s ease;cursor:pointer;min-height:4px;}
+.rev-bar:hover{opacity:0.8;}
+.rev-lbl{font-size:9.5px;color:var(--muted2);}
+.rev-legend{display:flex;gap:16px;margin-top:6px;}
+.rev-leg-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);}
+.rev-leg-dot{width:8px;height:8px;border-radius:2px;}
+
+/* TASKS */
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(22,40,64,0.5);cursor:pointer;transition:all 0.15s;}
+.task-item:last-child{border-bottom:none;}
+.task-item:hover{background:rgba(46,124,246,0.04);padding-left:5px;}
+.t-ck{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.18s;}
+.t-ck.done{background:var(--accent2);border-color:var(--accent2);color:#050A14;font-weight:800;}
+.t-nm{font-size:13px;font-weight:500;margin-bottom:3px;}
+.t-nm.done{text-decoration:line-through;color:var(--muted);}
+.t-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.t-tg{font-size:10.5px;padding:2px 7px;border-radius:5px;font-weight:600;}
+.t-as{font-size:11px;color:var(--muted2);}
+
+/* MEETINGS */
+.meet-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(22,40,64,0.5);align-items:center;}
+.meet-item:last-child{border-bottom:none;}
+.meet-time{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent);width:44px;flex-shrink:0;text-align:center;}
+.meet-line{width:2px;height:36px;border-radius:2px;flex-shrink:0;}
+.meet-title{font-size:13px;font-weight:500;margin-bottom:2px;}
+.meet-sub{font-size:11px;color:var(--muted2);}
+.meet-badge{margin-left:auto;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600;flex-shrink:0;}
+
+/* KPI */
+.kpi-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(22,40,64,0.5);}
+.kpi-item:last-child{border-bottom:none;}
+.kpi-ico{font-size:20px;width:28px;text-align:center;flex-shrink:0;}
+.kpi-name{font-size:13px;font-weight:500;flex:1;}
+.kpi-bar-w{flex:1.5;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.kpi-bar-f{height:100%;border-radius:3px;transition:width 1s ease;}
+.kpi-val{font-size:12px;font-weight:700;width:36px;text-align:right;}
+
+/* CHAT AREA */
+.chat-area{flex-shrink:0;padding:12px 24px 16px;background:rgba(5,10,20,0.88);backdrop-filter:blur(14px);border-top:1px solid var(--border);}
+.chat-wrap{background:var(--card);border:1px solid var(--border);border-radius:13px;display:flex;align-items:center;gap:9px;padding:9px 12px;transition:border-color 0.2s;}
+.chat-wrap:focus-within{border-color:rgba(46,124,246,0.42);}
+.c-plus{width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--muted);cursor:pointer;flex-shrink:0;transition:all 0.17s;}
+.c-plus:hover{border-color:var(--accent);color:var(--accent);}
+.c-inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif;}
+.c-inp::placeholder{color:var(--muted2);}
+.c-mdl{font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:7px;cursor:pointer;flex-shrink:0;}
+.c-snd{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0;transition:all 0.17s;}
+.c-snd:hover{transform:scale(1.07);box-shadow:0 4px 14px rgba(46,124,246,0.4);}
+
+@keyframes fup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="s-mark">B</div>
+    <span class="s-name">BrainOS</span>
+    <span class="s-badge">BIZ</span>
+  </div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <div class="s-item active"><span class="s-ico">🏢</span>Dashboard</div>
+    <a class="s-item" href="chat.html"><span class="s-ico">🤖</span>Korporativ AI<span class="s-badge2 sb-b">5</span></a>
+    <div class="s-sec" style="margin-top:6px">Boshqaruv</div>
+    <div class="s-item" onclick="navTo(this,'Loyihalar')"><span class="s-ico">💼</span>Loyihalar<span class="s-badge2 sb-w">3</span></div>
+    <div class="s-item" onclick="navTo(this,'Xodimlar')"><span class="s-ico">👥</span>Xodimlar</div>
+    <div class="s-item" onclick="navTo(this,'Mijozlar')"><span class="s-ico">🤝</span>Mijozlar</div>
+    <div class="s-item" onclick="navTo(this,'Hujjatlar')"><span class="s-ico">📄</span>Hujjatlar<span class="s-badge2 sb-r">2</span></div>
+    <div class="s-sec" style="margin-top:6px">Tahlil</div>
+    <div class="s-item" onclick="navTo(this,'Hisobotlar')"><span class="s-ico">📊</span>Hisobotlar</div>
+    <div class="s-item" onclick="navTo(this,'Moliya')"><span class="s-ico">💰</span>Moliya</div>
+    <div class="s-item" onclick="navTo(this,'KPI')"><span class="s-ico">🎯</span>KPI</div>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <div class="s-item" onclick="navTo(this,'Sozlamalar')"><span class="s-ico">⚙️</span>Sozlamalar</div>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user">
+    <div class="u-row">
+      <div class="u-av" style="border-radius:8px">BC</div>
+      <div>
+        <div class="u-nm">BrainCorp LLC</div>
+        <div class="u-pl"><span class="u-dt"></span>Pro plan</div>
+      </div>
+      <div class="u-mo">⋯</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-ttl" id="pgTitle">Biznes Dashboard</span>
+    <div class="tb-sp"></div>
+    <div class="srch">
+      <span style="color:var(--muted2);font-size:13px">🔍</span>
+      <input type="text" placeholder="Qidirish...">
+    </div>
+    <div class="tb-btn notif">🔔</div>
+    <div class="tb-btn" onclick="addEmployee()">👤+</div>
+    <div class="tb-btn" onclick="newProject()">📋+</div>
+  </div>
+
+  <div class="content">
+
+    <!-- GREETING -->
+    <div class="greet">
+      <div class="gr-em" id="grEm">☀️</div>
+      <div class="gr-tx">
+        <h2><span id="grWd">Xayrli tong</span>, BrainCorp!</h2>
+        <p id="grMsg">Bugun 3 ta loyiha faol, 2 ta yig'ilish rejalashtirilgan. Keling boshlaylik!</p>
+      </div>
+      <div class="gr-bts">
+        <button class="btn btn-g" onclick="openReport()">📊 Hisobot</button>
+        <button class="btn btn-p" onclick="newProject()">+ Yangi loyiha</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(46,124,246,0.12)">💼</div>
+        <div class="st-lbl">Faol loyihalar</div>
+        <div class="st-val" style="color:#7AB3FF">8</div>
+        <div class="st-chg cup">↑ 2 ta yangi</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(0,217,160,0.10)">👥</div>
+        <div class="st-lbl">Xodimlar</div>
+        <div class="st-val" style="color:#00D9A0">24</div>
+        <div class="st-chg cup">↑ 3 ta yangi</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(246,163,46,0.12)">🤝</div>
+        <div class="st-lbl">Faol mijozlar</div>
+        <div class="st-val" style="color:#F6A32E">17</div>
+        <div class="st-chg cnu">Barqaror</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(160,100,255,0.10)">💰</div>
+        <div class="st-lbl">Oylik daromad</div>
+        <div class="st-val" style="color:#C48AFF">84M</div>
+        <div class="st-chg cup">↑ +18%</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(246,92,46,0.10)">⏳</div>
+        <div class="st-lbl">Muddati yaqin</div>
+        <div class="st-val" style="color:#F65C2E">3</div>
+        <div class="st-chg cdn">Diqqat!</div>
+      </div>
+    </div>
+
+    <!-- TOP GRID -->
+    <div class="g-top">
+
+      <!-- PROJECTS -->
+      <div class="card">
+        <div class="c-hd">
+          <span class="c-ic">💼</span>
+          <span class="c-ttl">Faol loyihalar</span>
+          <span class="c-sub">8 ta</span>
+          <span class="c-act" onclick="newProject()">+ Yangi</span>
+        </div>
+        <div class="c-bd" style="max-height:280px;overflow-y:auto">
+          <div class="proj-item">
+            <div class="proj-color" style="background:var(--accent)"></div>
+            <div class="proj-body">
+              <div class="proj-name">BrainOS MVP</div>
+              <div class="proj-meta">
+                <span class="proj-tag" style="background:rgba(46,124,246,0.15);color:#7AB3FF">Texnologiya</span>
+                <span class="proj-dead">⏰ 15 iyun</span>
+              </div>
+            </div>
+            <div class="proj-right">
+              <span class="proj-pct" style="color:var(--accent)">68%</span>
+              <div class="proj-bar"><div class="proj-fill" style="width:68%;background:var(--accent)"></div></div>
+              <div class="proj-team">
+                <div class="proj-av" style="background:linear-gradient(135deg,#2E7CF6,#00D9A0)">AK</div>
+                <div class="proj-av" style="background:linear-gradient(135deg,#A064FF,#2E7CF6)">ZR</div>
+                <div class="proj-av" style="background:linear-gradient(135deg,#F6A32E,#F65C2E)">BN</div>
+              </div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-color" style="background:var(--accent2)"></div>
+            <div class="proj-body">
+              <div class="proj-name">Mijozlar CRM tizimi</div>
+              <div class="proj-meta">
+                <span class="proj-tag" style="background:rgba(0,217,160,0.12);color:#00D9A0">CRM</span>
+                <span class="proj-dead">⏰ 30 may</span>
+              </div>
+            </div>
+            <div class="proj-right">
+              <span class="proj-pct" style="color:var(--accent2)">91%</span>
+              <div class="proj-bar"><div class="proj-fill" style="width:91%;background:var(--accent2)"></div></div>
+              <div class="proj-team">
+                <div class="proj-av" style="background:linear-gradient(135deg,#00D9A0,#2E7CF6)">MX</div>
+                <div class="proj-av" style="background:linear-gradient(135deg,#2E7CF6,#A064FF)">FS</div>
+              </div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-color" style="background:var(--warn)"></div>
+            <div class="proj-body">
+              <div class="proj-name">Marketing kampaniya</div>
+              <div class="proj-meta">
+                <span class="proj-tag" style="background:rgba(246,163,46,0.15);color:#F6A32E">Marketing</span>
+                <span class="proj-dead">⏰ 1 iyun</span>
+              </div>
+            </div>
+            <div class="proj-right">
+              <span class="proj-pct" style="color:var(--warn)">45%</span>
+              <div class="proj-bar"><div class="proj-fill" style="width:45%;background:var(--warn)"></div></div>
+              <div class="proj-team">
+                <div class="proj-av" style="background:linear-gradient(135deg,#F6A32E,#F65C2E)">DK</div>
+                <div class="proj-av" style="background:linear-gradient(135deg,#A064FF,#2E7CF6)">NM</div>
+                <div class="proj-av" style="background:linear-gradient(135deg,#00D9A0,#2E7CF6)">SR</div>
+              </div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-color" style="background:var(--danger)"></div>
+            <div class="proj-body">
+              <div class="proj-name">Server migratsiyasi</div>
+              <div class="proj-meta">
+                <span class="proj-tag" style="background:rgba(246,92,46,0.15);color:#F65C2E">DevOps</span>
+                <span class="proj-dead" style="color:var(--danger)">⚠️ 28 may</span>
+              </div>
+            </div>
+            <div class="proj-right">
+              <span class="proj-pct" style="color:var(--danger)">23%</span>
+              <div class="proj-bar"><div class="proj-fill" style="width:23%;background:var(--danger)"></div></div>
+              <div class="proj-team">
+                <div class="proj-av" style="background:linear-gradient(135deg,#F65C2E,#A064FF)">JT</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPLOYEES -->
+      <div class="card">
+        <div class="c-hd">
+          <span class="c-ic">👥</span>
+          <span class="c-ttl">Xodimlar</span>
+          <span class="c-sub">24 ta</span>
+          <span class="c-act" onclick="addEmployee()">+ Qo'shish</span>
+        </div>
+        <div class="c-bd" style="max-height:280px;overflow-y:auto">
+          <div class="emp-item">
+            <div class="emp-av" style="background:linear-gradient(135deg,#2E7CF6,#00D9A0)">AK</div>
+            <div><div class="emp-name">Azizbek Karimov</div><div class="emp-role">Lead Developer</div></div>
+            <div class="emp-status"><div class="emp-dot emp-online"></div><span class="emp-tasks" style="color:var(--accent2)">Online · 5 ta</span></div>
+          </div>
+          <div class="emp-item">
+            <div class="emp-av" style="background:linear-gradient(135deg,#A064FF,#2E7CF6)">ZR</div>
+            <div><div class="emp-name">Zulfiya Rahimova</div><div class="emp-role">UI/UX Designer</div></div>
+            <div class="emp-status"><div class="emp-dot emp-online"></div><span class="emp-tasks" style="color:var(--accent2)">Online · 3 ta</span></div>
+          </div>
+          <div class="emp-item">
+            <div class="emp-av" style="background:linear-gradient(135deg,#F6A32E,#F65C2E)">BN</div>
+            <div><div class="emp-name">Bobur Nazarov</div><div class="emp-role">Backend Developer</div></div>
+            <div class="emp-status"><div class="emp-dot emp-away"></div><span class="emp-tasks" style="color:var(--warn)">Away · 4 ta</span></div>
+          </div>
+          <div class="emp-item">
+            <div class="emp-av" style="background:linear-gradient(135deg,#00D9A0,#2E7CF6)">MX</div>
+            <div><div class="emp-name">Malika Xasanova</div><div class="emp-role">Project Manager</div></div>
+            <div class="emp-status"><div class="emp-dot emp-online"></div><span class="emp-tasks" style="color:var(--accent2)">Online · 6 ta</span></div>
+          </div>
+          <div class="emp-item">
+            <div class="emp-av" style="background:linear-gradient(135deg,#F65C2E,#A064FF)">JT</div>
+            <div><div class="emp-name">Jasur Toshmatov</div><div class="emp-role">DevOps Engineer</div></div>
+            <div class="emp-status"><div class="emp-dot emp-offline"></div><span class="emp-tasks" style="color:var(--muted2)">Offline · 2 ta</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: MEETINGS + CLIENTS -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- MEETINGS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📅</span>
+            <span class="c-ttl">Bugungi yig'ilishlar</span>
+            <span class="c-act" onclick="addMeeting()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd">
+            <div class="meet-item">
+              <div class="meet-time">10:00</div>
+              <div class="meet-line" style="background:var(--accent)"></div>
+              <div>
+                <div class="meet-title">Haftalik sprint</div>
+                <div class="meet-sub">Butun jamoa · 30 daqiqa</div>
+              </div>
+              <span class="meet-badge" style="background:rgba(0,217,160,0.12);color:#00D9A0">Boshlandi</span>
+            </div>
+            <div class="meet-item">
+              <div class="meet-time">14:00</div>
+              <div class="meet-line" style="background:var(--warn)"></div>
+              <div>
+                <div class="meet-title">Mijoz prezentatsiya</div>
+                <div class="meet-sub">TechCorp · 1 soat</div>
+              </div>
+              <span class="meet-badge" style="background:rgba(246,163,46,0.15);color:#F6A32E">Rejalangan</span>
+            </div>
+            <div class="meet-item">
+              <div class="meet-time">17:00</div>
+              <div class="meet-line" style="background:var(--purple)"></div>
+              <div>
+                <div class="meet-title">1:1 — Azizbek</div>
+                <div class="meet-sub">Shaxsiy · 30 daqiqa</div>
+              </div>
+              <span class="meet-badge" style="background:rgba(160,100,255,0.12);color:#C48AFF">Rejalangan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLIENTS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">🤝</span>
+            <span class="c-ttl">Asosiy mijozlar</span>
+            <span class="c-act" onclick="addClient()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd">
+            <div class="client-item">
+              <div class="client-logo" style="background:rgba(46,124,246,0.12)">🏦</div>
+              <div><div class="client-name">TechCorp Asia</div><div class="client-type">IT kompaniya</div></div>
+              <div class="client-right"><div class="client-val">+45M so'm</div><div class="client-status" style="color:var(--accent2)">Faol ✓</div></div>
+            </div>
+            <div class="client-item">
+              <div class="client-logo" style="background:rgba(0,217,160,0.10)">🏪</div>
+              <div><div class="client-name">GreenMart</div><div class="client-type">E-commerce</div></div>
+              <div class="client-right"><div class="client-val">+28M so'm</div><div class="client-status" style="color:var(--accent2)">Faol ✓</div></div>
+            </div>
+            <div class="client-item">
+              <div class="client-logo" style="background:rgba(246,163,46,0.12)">🏗️</div>
+              <div><div class="client-name">BuildPro UZ</div><div class="client-type">Qurilish</div></div>
+              <div class="client-right"><div class="client-val">+11M so'm</div><div class="client-status" style="color:var(--warn)">Kutilmoqda</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MID GRID -->
+    <div class="g-mid">
+
+      <!-- REVENUE CHART -->
+      <div class="card">
+        <div class="c-hd">
+          <span class="c-ic">📈</span>
+          <span class="c-ttl">Daromad dinamikasi</span>
+          <span class="c-sub">oxirgi 6 oy</span>
+          <span class="c-act" onclick="openReport()">Batafsil →</span>
+        </div>
+        <div class="rev-chart">
+          <div class="rev-bars" id="revBars"></div>
+          <div class="rev-legend">
+            <div class="rev-leg-item"><div class="rev-leg-dot" style="background:rgba(46,124,246,0.7)"></div>Daromad</div>
+            <div class="rev-leg-item"><div class="rev-leg-dot" style="background:rgba(246,92,46,0.6)"></div>Xarajat</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="card">
+        <div class="c-hd">
+          <span class="c-ic">🎯</span>
+          <span class="c-ttl">KPI ko'rsatkichlari</span>
+          <span class="c-sub">bu oy</span>
+        </div>
+        <div class="c-bd">
+          <div class="kpi-item">
+            <span class="kpi-ico">💰</span>
+            <span class="kpi-name">Daromad maqsad</span>
+            <div class="kpi-bar-w"><div class="kpi-bar-f" style="width:84%;background:linear-gradient(90deg,#2E7CF6,#00D9A0)"></div></div>
+            <span class="kpi-val" style="color:var(--accent2)">84%</span>
+          </div>
+          <div class="kpi-item">
+            <span class="kpi-ico">🤝</span>
+            <span class="kpi-name">Yangi mijozlar</span>
+            <div class="kpi-bar-w"><div class="kpi-bar-f" style="width:60%;background:linear-gradient(90deg,#A064FF,#2E7CF6)"></div></div>
+            <span class="kpi-val" style="color:var(--purple)">60%</span>
+          </div>
+          <div class="kpi-item">
+            <span class="kpi-ico">✅</span>
+            <span class="kpi-name">Loyiha bajarilishi</span>
+            <div class="kpi-bar-w"><div class="kpi-bar-f" style="width:78%;background:linear-gradient(90deg,#00D9A0,#2E7CF6)"></div></div>
+            <span class="kpi-val" style="color:var(--accent2)">78%</span>
+          </div>
+          <div class="kpi-item">
+            <span class="kpi-ico">😊</span>
+            <span class="kpi-name">Mijoz mamnunligi</span>
+            <div class="kpi-bar-w"><div class="kpi-bar-f" style="width:92%;background:linear-gradient(90deg,#F6A32E,#00D9A0)"></div></div>
+            <span class="kpi-val" style="color:var(--accent2)">92%</span>
+          </div>
+          <div class="kpi-item">
+            <span class="kpi-ico">👥</span>
+            <span class="kpi-name">Jamoa samaradorligi</span>
+            <div class="kpi-bar-w"><div class="kpi-bar-f" style="width:71%;background:linear-gradient(90deg,#F6A32E,#2E7CF6)"></div></div>
+            <span class="kpi-val" style="color:var(--warn)">71%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- AI CHAT INPUT -->
+  <div class="chat-area">
+    <div class="chat-wrap">
+      <div class="c-plus">+</div>
+      <input class="c-inp" type="text" placeholder="Korporativ AI ga savol yozing..." id="chatInp">
+      <div class="c-mdl">Sonnet 4.6 ▾</div>
+      <button class="c-snd" onclick="sendChat()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// GREETING
+(function(){
+  const h=new Date().getHours();
+  const d=h<12?['☀️','Xayrli tong','Bugun 3 ta loyiha faol, 2 ta yig\'ilish rejalashtirilgan. Keling boshlaylik!']
+           :h<17?['🌤️','Xayrli kun','Kunning yarmi o\'tdi. Loyihalar va xodimlar holatini tekshiring.']
+           :h<21?['🌇','Xayrli kech','Kunlik natijalarni ko\'ring va ertangi kunni rejalashtiring.']
+                :['🌙','Yaxshi tun','Bugungi ish yakunlandi. Ertangi reja tayyor!'];
+  document.getElementById('grEm').textContent=d[0];
+  document.getElementById('grWd').textContent=d[1];
+  document.getElementById('grMsg').textContent=d[2];
+})();
+
+// NAV
+function navTo(el,title){
+  document.querySelectorAll('.s-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pgTitle').textContent=title;
+}
+
+// REVENUE CHART
+const revData=[
+  {m:'Dek',inc:58,out:38},{m:'Yan',inc:62,out:42},{m:'Feb',inc:71,out:48},
+  {m:'Mar',inc:65,out:44},{m:'Apr',inc:78,out:52},{m:'May',inc:84,out:56},
+];
+function renderChart(){
+  const wrap=document.getElementById('revBars');
+  wrap.innerHTML='';
+  const max=Math.max(...revData.map(d=>Math.max(d.inc,d.out)));
+  revData.forEach(d=>{
+    const iH=Math.round(d.inc/max*90);
+    const oH=Math.round(d.out/max*90);
+    const div=document.createElement('div');
+    div.className='rev-bar-w';
+    div.innerHTML=`
+      <div class="rev-bar-inner" style="gap:2px">
+        <div class="rev-bar" style="height:${iH}%;background:rgba(46,124,246,0.6);flex:1" title="${d.inc}M so'm daromad"></div>
+        <div class="rev-bar" style="height:${oH}%;background:rgba(246,92,46,0.5);flex:1" title="${d.out}M so'm xarajat"></div>
+      </div>
+      <div class="rev-lbl">${d.m}</div>`;
+    wrap.appendChild(div);
+  });
+}
+renderChart();
+
+// ACTIONS
+function newProject(){
+  const name=prompt('Yangi loyiha nomi:');
+  if(name&&name.trim()) alert('Loyiha "'+name.trim()+'" yaratildi! ✅');
+}
+function addEmployee(){
+  const name=prompt('Xodim ismi:');
+  if(name&&name.trim()) alert(name.trim()+' xodim ro\'yxatga qo\'shildi! ✅');
+}
+function addMeeting(){
+  alert('Yangi yig\'ilish qo\'shish — tez orada!');
+}
+function addClient(){
+  const name=prompt('Mijoz kompaniya nomi:');
+  if(name&&name.trim()) alert(name.trim()+' mijoz ro\'yxatga qo\'shildi! ✅');
+}
+function openReport(){
+  alert('Batafsil hisobot — tez orada! 📊');
+}
+
+// CHAT
+function sendChat(){
+  const inp=document.getElementById('chatInp');
+  if(!inp.value.trim()) return;
+  window.location.href='chat.html?q='+encodeURIComponent(inp.value.trim());
+}
+document.getElementById('chatInp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+</script>
+</body>
+</html>

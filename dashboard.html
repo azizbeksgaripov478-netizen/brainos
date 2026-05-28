@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:      #050A14;
+  --bg2:     #07101F;
+  --surface: #0D1B33;
+  --card:    #0A172B;
+  --border:  #162840;
+  --border2: #1E3555;
+  --accent:  #2E7CF6;
+  --accent2: #00D9A0;
+  --warn:    #F6A32E;
+  --danger:  #F65C2E;
+  --purple:  #A064FF;
+  --text:    #EFF4FF;
+  --muted:   #7A9BBF;
+  --muted2:  #3D5A7A;
+  --sw:      230px;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* AMBIENT */
+.g1,.g2 { position:fixed; pointer-events:none; z-index:0; border-radius:50%; }
+.g1 { width:600px;height:600px;top:-150px;left:-100px;
+  background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%); }
+.g2 { width:450px;height:450px;bottom:-80px;right:-60px;
+  background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sw); flex-shrink:0; height:100vh;
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; position:relative; z-index:10;
+}
+.s-logo {
+  padding:20px 16px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.s-mark {
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#2E7CF6,#00D9A0);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;
+}
+.s-name {
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  background:linear-gradient(135deg,#2E7CF6,#00D9A0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.s-nav { flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px; }
+.s-sec {
+  font-size:10px;font-weight:700;color:var(--muted2);
+  letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px;
+}
+.s-item {
+  display:flex;align-items:center;gap:9px;padding:9px 10px;
+  border-radius:9px;cursor:pointer;color:var(--muted);font-size:13.5px;
+  transition:all 0.17s;position:relative;user-select:none;text-decoration:none;
+}
+.s-item:hover { background:rgba(46,124,246,0.07);color:var(--text); }
+.s-item.active { background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500; }
+.s-item.active::before {
+  content:'';position:absolute;left:0;top:25%;bottom:25%;
+  width:2.5px;border-radius:0 3px 3px 0;background:var(--accent);
+}
+.s-ico { font-size:15px;width:18px;text-align:center;flex-shrink:0; }
+.s-badge {
+  margin-left:auto;font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;
+}
+.sb-b { background:rgba(46,124,246,0.25);color:#7AB3FF; }
+.sb-w { background:rgba(246,163,46,0.2);color:var(--warn); }
+.s-user { padding:10px 8px;border-top:1px solid var(--border); }
+.u-row {
+  display:flex;align-items:center;gap:9px;padding:9px 10px;
+  border-radius:9px;cursor:pointer;transition:background 0.17s;
+}
+.u-row:hover { background:rgba(255,255,255,0.04); }
+.u-av {
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#2E7CF6,#00D9A0);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;
+}
+.u-nm { font-size:13px;font-weight:600; }
+.u-pl { font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px; }
+.u-dt { width:5px;height:5px;border-radius:50%;background:var(--accent2); }
+.u-mo { margin-left:auto;color:var(--muted2);font-size:16px; }
+
+/* ── MAIN ── */
+.main { flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1; }
+
+/* TOPBAR */
+.topbar {
+  height:56px;flex-shrink:0;padding:0 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);
+}
+.tb-ttl { font-family:'Syne',sans-serif;font-size:15px;font-weight:700; }
+.tb-sp { flex:1; }
+.srch {
+  display:flex;align-items:center;gap:7px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:9px;padding:6px 11px;width:200px;transition:all 0.2s;
+}
+.srch:focus-within { border-color:rgba(46,124,246,0.4);width:240px; }
+.srch input { background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%; }
+.srch input::placeholder { color:var(--muted2); }
+.tb-btn {
+  width:34px;height:34px;border-radius:9px;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;color:var(--muted);
+  transition:all 0.17s;position:relative;flex-shrink:0;
+}
+.tb-btn:hover { border-color:var(--border2);color:var(--text); }
+.tb-btn.notif::after {
+  content:'';position:absolute;top:6px;right:6px;
+  width:7px;height:7px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);
+}
+
+/* CONTENT */
+.content { flex:1;overflow-y:auto;padding:22px 24px 28px;display:flex;flex-direction:column;gap:20px; }
+
+/* GREETING */
+.greet {
+  background:linear-gradient(135deg,rgba(46,124,246,0.13),rgba(0,217,160,0.06));
+  border:1px solid rgba(46,124,246,0.22);border-radius:16px;padding:22px 24px;
+  display:flex;align-items:center;gap:16px;
+  position:relative;overflow:hidden;animation:fup 0.4s ease both;
+}
+.greet::after {
+  content:'';position:absolute;right:-50px;top:-50px;
+  width:220px;height:220px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(46,124,246,0.10),transparent 65%);
+}
+.gr-em { font-size:40px;flex-shrink:0; }
+.gr-tx h2 { font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:3px; }
+.gr-tx h2 span { background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+.gr-tx p { font-size:13.5px;color:var(--muted);line-height:1.5; }
+.gr-bts { margin-left:auto;display:flex;gap:8px;flex-shrink:0; }
+.btn { padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.17s;white-space:nowrap; }
+.btn-p { background:linear-gradient(135deg,#2E7CF6,#1660D0);color:#fff;box-shadow:0 4px 14px rgba(46,124,246,0.28); }
+.btn-p:hover { transform:translateY(-1px);box-shadow:0 6px 18px rgba(46,124,246,0.38); }
+.btn-g { background:transparent;color:var(--muted);border:1px solid var(--border2); }
+.btn-g:hover { color:var(--text);border-color:var(--muted2); }
+
+/* STATS */
+.stats { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;animation:fup 0.4s 0.07s ease both; }
+.stat {
+  background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;
+  transition:all 0.2s;cursor:default;position:relative;overflow:hidden;
+}
+.stat:hover { border-color:var(--border2);transform:translateY(-2px); }
+.st-lbl { font-size:11.5px;color:var(--muted);margin-bottom:9px; }
+.st-val { font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:5px; }
+.st-chg { font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:3px; }
+.cup { color:var(--accent2); } .cdn { color:var(--danger); } .cnu { color:var(--muted); }
+.st-ic { position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px; }
+
+/* GRIDS */
+.g-main { display:grid;grid-template-columns:1fr 310px;gap:16px;animation:fup 0.4s 0.14s ease both; }
+.g-bot  { display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;animation:fup 0.4s 0.21s ease both; }
+.col    { display:flex;flex-direction:column;gap:16px; }
+
+/* CARD */
+.card { background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden; }
+.c-hd { padding:15px 18px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border); }
+.c-ic { font-size:15px; }
+.c-ttl { font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700; }
+.c-sub { font-size:11.5px;color:var(--muted); }
+.c-act { margin-left:auto;font-size:12px;color:var(--accent);cursor:pointer;font-weight:500;transition:opacity 0.17s; }
+.c-act:hover { opacity:0.7; }
+.c-bd { padding:14px 18px; }
+
+/* TASKS */
+.t-list { display:flex;flex-direction:column; }
+.task {
+  display:flex;align-items:flex-start;gap:10px;padding:11px 4px;
+  border-bottom:1px solid rgba(22,40,64,0.55);cursor:pointer;transition:all 0.15s;border-radius:7px;
+}
+.task:last-child { border-bottom:none; }
+.task:hover { background:rgba(46,124,246,0.04);padding-left:8px; }
+.t-ck {
+  width:17px;height:17px;border-radius:5px;border:1.5px solid var(--border2);
+  flex-shrink:0;margin-top:2px;transition:all 0.18s;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+}
+.t-ck.done { background:var(--accent2);border-color:var(--accent2);color:#050A14;font-weight:800; }
+.t-bd { flex:1; }
+.t-nm { font-size:13.5px;font-weight:500;margin-bottom:4px;transition:all 0.18s; }
+.t-nm.done { text-decoration:line-through;color:var(--muted); }
+.t-mt { display:flex;gap:8px;align-items:center;flex-wrap:wrap; }
+.t-tg { font-size:10.5px;padding:2px 7px;border-radius:5px;font-weight:600; }
+.t-tm { font-size:11.5px;color:var(--muted); }
+.t-dt { width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px; }
+
+/* PROGRESS */
+.pr-it { margin-bottom:13px; }
+.pr-it:last-child { margin-bottom:0; }
+.pr-if { display:flex;justify-content:space-between;margin-bottom:5px; }
+.pr-lb { font-size:13px;font-weight:500; }
+.pr-pc { font-size:11.5px;color:var(--muted);font-weight:600; }
+.pr-br { height:4px;background:var(--border);border-radius:3px;overflow:hidden; }
+.pr-fl { height:100%;border-radius:3px;transition:width 1.2s ease; }
+
+/* NOTES */
+.note {
+  padding:11px 13px;border-radius:9px;
+  background:rgba(13,27,51,0.7);border:1px solid var(--border);
+  margin-bottom:9px;cursor:pointer;transition:all 0.17s;
+}
+.note:hover { border-color:var(--border2);transform:translateY(-1px); }
+.note:last-child { margin-bottom:0; }
+.n-ttl { font-size:13px;font-weight:600;margin-bottom:3px; }
+.n-prv { font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.n-ft  { display:flex;align-items:center;gap:7px;margin-top:7px; }
+.n-dt  { font-size:10.5px;color:var(--muted2); }
+.n-ct  { font-size:10px;padding:1px 7px;border-radius:5px;font-weight:600;letter-spacing:0.3px; }
+
+/* HABITS */
+.habit { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(22,40,64,0.5); }
+.habit:last-child { border-bottom:none; }
+.h-em { font-size:18px;width:24px;text-align:center;flex-shrink:0; }
+.h-nm { font-size:13px;font-weight:500;flex:1; }
+.h-ds { display:flex;gap:3px; }
+.h-d  { width:20px;height:20px;border-radius:5px;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s; }
+.hd { background:var(--accent2);color:#050A14; }
+.hm { background:var(--border);color:var(--muted2); }
+.ht { background:rgba(46,124,246,0.22);color:var(--accent);border:1px solid rgba(46,124,246,0.4); }
+
+/* CALENDAR */
+.cal-h { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
+.cal-mn { font-family:'Syne',sans-serif;font-size:13px;font-weight:700; }
+.cal-nv { color:var(--muted);cursor:pointer;font-size:14px;padding:2px 5px;border-radius:4px;transition:background 0.15s;user-select:none; }
+.cal-nv:hover { background:var(--border);color:var(--text); }
+.cal-g { display:grid;grid-template-columns:repeat(7,1fr);gap:1px; }
+.cal-lb { font-size:9.5px;color:var(--muted2);text-align:center;font-weight:700;padding:2px 0; }
+.cal-d { aspect-ratio:1;border-radius:5px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.13s;color:var(--muted); }
+.cal-d:hover { background:var(--border);color:var(--text); }
+.cal-d.today { background:var(--accent);color:#fff;font-weight:700;border-radius:7px; }
+.cal-d.ev { color:var(--text);font-weight:500;position:relative; }
+.cal-d.ev::after { content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--accent2); }
+.cal-d.dim { color:var(--muted2);opacity:0.35; }
+
+/* FINANCE */
+.fin { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(22,40,64,0.5); }
+.fin:last-child { border-bottom:none; }
+.f-ic { width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+.f-nm { font-size:13px;font-weight:500; }
+.f-dt { font-size:11px;color:var(--muted2); }
+.f-am { margin-left:auto;font-size:13.5px;font-weight:700; }
+.fout { color:var(--danger); } .finc { color:var(--accent2); }
+
+/* READING */
+.rd-it { display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(22,40,64,0.5); }
+.rd-it:last-child { border-bottom:none; }
+.bk-cv { width:32px;height:44px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px; }
+.bk-ttl { font-size:12.5px;font-weight:600;margin-bottom:2px; }
+.bk-au  { font-size:11px;color:var(--muted);margin-bottom:5px; }
+.bk-br  { height:3px;background:var(--border);border-radius:2px;overflow:hidden; }
+.bk-fl  { height:100%;border-radius:2px;background:linear-gradient(90deg,var(--warn),#F66B2E); }
+.bk-pc  { font-size:10.5px;color:var(--muted);margin-top:2px; }
+
+/* CHAT INPUT */
+.chat-area {
+  flex-shrink:0;padding:12px 24px 16px;
+  background:rgba(5,10,20,0.88);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+}
+.chat-wrap {
+  background:var(--card);border:1px solid var(--border);border-radius:13px;
+  display:flex;align-items:center;gap:9px;padding:9px 12px;transition:border-color 0.2s;
+}
+.chat-wrap:focus-within { border-color:rgba(46,124,246,0.42); }
+.c-plus {
+  width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--muted);cursor:pointer;flex-shrink:0;transition:all 0.17s;
+}
+.c-plus:hover { border-color:var(--accent);color:var(--accent); }
+.c-inp { flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif; }
+.c-inp::placeholder { color:var(--muted2); }
+.c-mdl { font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:7px;cursor:pointer;flex-shrink:0; }
+.c-snd {
+  width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;flex-shrink:0;transition:all 0.17s;
+}
+.c-snd:hover { transform:scale(1.07);box-shadow:0 4px 14px rgba(46,124,246,0.4); }
+
+@keyframes fup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="s-mark">B</div>
+    <span class="s-name">BrainOS</span>
+  </div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <div class="s-item active" onclick="nav(this,'Dashboard')"><span class="s-ico">🏠</span>Dashboard</div>
+    <a class="s-item" href="chat.html"><span class="s-ico">💬</span>AI Chat<span class="s-badge sb-b">3</span></a>
+    <a class="s-item" href="notes.html"><span class="s-ico">📝</span>Qaydlar</a>
+    <a class="s-item" href="plan.html"><span class="s-ico">📅</span>Kunlik reja<span class="s-badge sb-w">2</span></a>
+    <a class="s-item" href="reminders.html"><span class="s-ico">⏰</span>Eslatmalar</a>
+    <div class="s-sec" style="margin-top:6px">Rivojlanish</div>
+    <div class="s-item" onclick="nav(this,'Odatlar')"><span class="s-ico">🎯</span>Odatlar</div>
+    <a class="s-item" href="reading.html"><span class="s-ico">📚</span>O'qish</a>
+    <a class="s-item" href="finance.html"><span class="s-ico">💰</span>Moliya</a>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <div class="s-item" onclick="nav(this,'Statistika')"><span class="s-ico">📊</span>Statistika</div>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user">
+    <div class="u-row">
+      <div class="u-av">AK</div>
+      <div><div class="u-nm">Azizbek</div><div class="u-pl"><span class="u-dt"></span>Free plan</div></div>
+      <div class="u-mo">⋯</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-ttl" id="pgTitle">Dashboard</span>
+    <div class="tb-sp"></div>
+    <div class="srch"><span style="color:var(--muted2);font-size:13px">🔍</span><input type="text" placeholder="Qidirish... (⌘K)"></div>
+    <div class="tb-btn notif">🔔</div>
+    <div class="tb-btn">⚙️</div>
+  </div>
+
+  <div class="content">
+
+    <!-- GREETING -->
+    <div class="greet">
+      <div class="gr-em" id="grEm">☀️</div>
+      <div class="gr-tx">
+        <h2><span id="grWd">Xayrli tong</span>, Azizbek!</h2>
+        <p id="grMsg">Bugun 5 ta vazifa kutmoqda. Ulardan 2 tasi muhim — keling boshlaylik!</p>
+      </div>
+      <div class="gr-bts">
+        <button class="btn btn-g" onclick="window.location.href='plan.html'">Bugungi rejani ko'r</button>
+        <button class="btn btn-p" onclick="addTask()">+ Yangi vazifa</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(46,124,246,0.12)">✅</div>
+        <div class="st-lbl">Bajarilgan vazifalar</div>
+        <div class="st-val" style="color:#7AB3FF">12</div>
+        <div class="st-chg cup">↑ 3 ta bugun</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(0,217,160,0.10)">📝</div>
+        <div class="st-lbl">Qaydlar soni</div>
+        <div class="st-val" style="color:#00D9A0">47</div>
+        <div class="st-chg cup">↑ 2 ta yangi</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(246,163,46,0.12)">🔥</div>
+        <div class="st-lbl">Streak (kunlar)</div>
+        <div class="st-val" style="color:#F6A32E">14</div>
+        <div class="st-chg cnu">Davom etmoqda</div>
+      </div>
+      <div class="stat">
+        <div class="st-ic" style="background:rgba(246,92,46,0.10)">🎯</div>
+        <div class="st-lbl">Haftalik maqsad</div>
+        <div class="st-val" style="color:#F65C2E">68%</div>
+        <div class="st-chg cdn">↓ 2 kun qoldi</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="g-main">
+      <div class="col">
+
+        <!-- TASKS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📋</span>
+            <span class="c-ttl">Bugungi vazifalar</span>
+            <span class="c-sub" id="taskCount">3 ta qoldi</span>
+            <span class="c-act" onclick="addTask()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd" style="max-height:260px;overflow-y:auto">
+            <div class="t-list" id="taskList">
+              <div class="task" onclick="toggleTask(this)">
+                <div class="t-ck done">✓</div>
+                <div class="t-bd"><div class="t-nm done">BrainOS landing page tugatish</div>
+                  <div class="t-mt"><span class="t-tg" style="background:rgba(46,124,246,0.15);color:#7AB3FF">Loyiha</span><span class="t-tm">⏰ 10:00</span></div></div>
+                <div class="t-dt" style="background:var(--danger)"></div>
+              </div>
+              <div class="task" onclick="toggleTask(this)">
+                <div class="t-ck"></div>
+                <div class="t-bd"><div class="t-nm">Dashboard dizaynini yakunlash</div>
+                  <div class="t-mt"><span class="t-tg" style="background:rgba(46,124,246,0.15);color:#7AB3FF">Loyiha</span><span class="t-tm">⏰ 14:00</span></div></div>
+                <div class="t-dt" style="background:var(--danger)"></div>
+              </div>
+              <div class="task" onclick="toggleTask(this)">
+                <div class="t-ck"></div>
+                <div class="t-bd"><div class="t-nm">Supabase backend bog'lash</div>
+                  <div class="t-mt"><span class="t-tg" style="background:rgba(0,217,160,0.12);color:#00D9A0">Backend</span><span class="t-tm">⏰ 16:00</span></div></div>
+                <div class="t-dt" style="background:var(--warn)"></div>
+              </div>
+              <div class="task" onclick="toggleTask(this)">
+                <div class="t-ck"></div>
+                <div class="t-bd"><div class="t-nm">Kitob o'qish — 30 daqiqa</div>
+                  <div class="t-mt"><span class="t-tg" style="background:rgba(160,100,255,0.15);color:#C48AFF">Shaxsiy</span><span class="t-tm">⏰ 21:00</span></div></div>
+                <div class="t-dt" style="background:var(--accent2)"></div>
+              </div>
+              <div class="task" onclick="toggleTask(this)">
+                <div class="t-ck done">✓</div>
+                <div class="t-bd"><div class="t-nm done">Ertalabki badantarbiya</div>
+                  <div class="t-mt"><span class="t-tg" style="background:rgba(246,163,46,0.15);color:#F6A32E">Sog'liq</span><span class="t-tm">⏰ 07:00</span></div></div>
+                <div class="t-dt" style="background:var(--accent2)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HABITS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">🎯</span><span class="c-ttl">Odatlar — bu hafta</span>
+            <span class="c-act" onclick="window.location.href='plan.html'">Barchasi →</span>
+          </div>
+          <div class="c-bd">
+            <div class="habit"><span class="h-em">🏋️</span><span class="h-nm">Sport</span>
+              <div class="h-ds"><div class="h-d hd">D</div><div class="h-d hd">S</div><div class="h-d hd">Ch</div><div class="h-d hm">P</div><div class="h-d hd">J</div><div class="h-d hd">Sh</div><div class="h-d ht">Y</div></div></div>
+            <div class="habit"><span class="h-em">📚</span><span class="h-nm">O'qish</span>
+              <div class="h-ds"><div class="h-d hd">D</div><div class="h-d hd">S</div><div class="h-d hm">Ch</div><div class="h-d hd">P</div><div class="h-d hd">J</div><div class="h-d hm">Sh</div><div class="h-d ht">Y</div></div></div>
+            <div class="habit"><span class="h-em">💧</span><span class="h-nm">Suv ichish</span>
+              <div class="h-ds"><div class="h-d hd">D</div><div class="h-d hd">S</div><div class="h-d hd">Ch</div><div class="h-d hd">P</div><div class="h-d hd">J</div><div class="h-d hd">Sh</div><div class="h-d ht">Y</div></div></div>
+            <div class="habit"><span class="h-em">🧘</span><span class="h-nm">Meditatsiya</span>
+              <div class="h-ds"><div class="h-d hd">D</div><div class="h-d hm">S</div><div class="h-d hd">Ch</div><div class="h-d hm">P</div><div class="h-d hd">J</div><div class="h-d hm">Sh</div><div class="h-d ht">Y</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COL -->
+      <div class="col">
+
+        <!-- NOTES -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📝</span><span class="c-ttl">So'nggi qaydlar</span>
+            <span class="c-act" onclick="window.location.href='notes.html'">Barchasi →</span>
+          </div>
+          <div class="c-bd">
+            <div class="note" onclick="window.location.href='notes.html'">
+              <div class="n-ttl">BrainOS loyiha g'oyalari</div>
+              <div class="n-prv">Dashboard uchun jismoniy va yuridik shaxslarni ajratish, modullar...</div>
+              <div class="n-ft"><span class="n-dt">Bugun, 14:32</span><span class="n-ct" style="background:rgba(46,124,246,0.15);color:#7AB3FF">Loyiha</span></div>
+            </div>
+            <div class="note" onclick="window.location.href='notes.html'">
+              <div class="n-ttl">Haftalik maqsadlar</div>
+              <div class="n-prv">Bu hafta 3 ta asosiy modul tugatilishi kerak: Landing, Dashboard, Auth...</div>
+              <div class="n-ft"><span class="n-dt">Kecha, 20:15</span><span class="n-ct" style="background:rgba(246,163,46,0.15);color:#F6A32E">Maqsad</span></div>
+            </div>
+            <div class="note" onclick="window.location.href='notes.html'">
+              <div class="n-ttl">Clean Code eslatmalar</div>
+              <div class="n-prv">Funksiyalar kichik bo'lsin. DRY prinsipi. Har bir funksiya bitta ish...</div>
+              <div class="n-ft"><span class="n-dt">2 kun oldin</span><span class="n-ct" style="background:rgba(160,100,255,0.15);color:#C48AFF">O'qish</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GOALS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📊</span><span class="c-ttl">Maqsadlar</span><span class="c-sub">bu oy</span>
+          </div>
+          <div class="c-bd">
+            <div class="pr-it"><div class="pr-if"><span class="pr-lb">BrainOS MVP</span><span class="pr-pc">68%</span></div>
+              <div class="pr-br"><div class="pr-fl" style="width:68%;background:linear-gradient(90deg,#2E7CF6,#00D9A0)"></div></div></div>
+            <div class="pr-it"><div class="pr-if"><span class="pr-lb">Kitob o'qish (4 ta)</span><span class="pr-pc">50%</span></div>
+              <div class="pr-br"><div class="pr-fl" style="width:50%;background:linear-gradient(90deg,#A064FF,#2E7CF6)"></div></div></div>
+            <div class="pr-it"><div class="pr-if"><span class="pr-lb">Sport — 20 kun</span><span class="pr-pc">85%</span></div>
+              <div class="pr-br"><div class="pr-fl" style="width:85%;background:linear-gradient(90deg,#00D9A0,#2E7CF6)"></div></div></div>
+            <div class="pr-it"><div class="pr-if"><span class="pr-lb">Tejash — 5 mln</span><span class="pr-pc">32%</span></div>
+              <div class="pr-br"><div class="pr-fl" style="width:32%;background:linear-gradient(90deg,#F6A32E,#F65C2E)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="g-bot">
+
+      <!-- CALENDAR -->
+      <div class="card">
+        <div class="c-hd"><span class="c-ic">📅</span><span class="c-ttl">Kalendar</span></div>
+        <div class="c-bd">
+          <div class="cal-h">
+            <span class="cal-nv" onclick="calPrev()">‹</span>
+            <span class="cal-mn" id="calMn">May 2026</span>
+            <span class="cal-nv" onclick="calNext()">›</span>
+          </div>
+          <div class="cal-g" id="calG">
+            <div class="cal-lb">Du</div><div class="cal-lb">Se</div><div class="cal-lb">Ch</div>
+            <div class="cal-lb">Pa</div><div class="cal-lb">Ju</div><div class="cal-lb">Sh</div><div class="cal-lb">Ya</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="card">
+        <div class="c-hd"><span class="c-ic">💰</span><span class="c-ttl">Tranzaksiyalar</span>
+          <span class="c-act" onclick="window.location.href='finance.html'">Barchasi →</span></div>
+        <div class="c-bd">
+          <div class="fin"><div class="f-ic" style="background:rgba(246,92,46,0.12)">🛒</div>
+            <div><div class="f-nm">Oziq-ovqat</div><div class="f-dt">Bugun</div></div><div class="f-am fout">-85,000</div></div>
+          <div class="fin"><div class="f-ic" style="background:rgba(0,217,160,0.10)">💼</div>
+            <div><div class="f-nm">Freelance to'lov</div><div class="f-dt">Kecha</div></div><div class="f-am finc">+1,200,000</div></div>
+          <div class="fin"><div class="f-ic" style="background:rgba(246,163,46,0.12)">☕</div>
+            <div><div class="f-nm">Kafe</div><div class="f-dt">18 may</div></div><div class="f-am fout">-35,000</div></div>
+          <div class="fin"><div class="f-ic" style="background:rgba(46,124,246,0.12)">📱</div>
+            <div><div class="f-nm">Internet to'lov</div><div class="f-dt">17 may</div></div><div class="f-am fout">-60,000</div></div>
+        </div>
+      </div>
+
+      <!-- READING -->
+      <div class="card">
+        <div class="c-hd"><span class="c-ic">📚</span><span class="c-ttl">O'qish rejasi</span>
+          <span class="c-act" onclick="window.location.href='reading.html'">Barchasi →</span></div>
+        <div class="c-bd">
+          <div class="rd-it">
+            <div class="bk-cv" style="background:rgba(46,124,246,0.15)">📘</div>
+            <div style="flex:1"><div class="bk-ttl">Clean Code</div><div class="bk-au">Robert C. Martin</div>
+              <div class="bk-br"><div class="bk-fl" style="width:72%"></div></div><div class="bk-pc">72% • 215/299 bet</div></div>
+          </div>
+          <div class="rd-it">
+            <div class="bk-cv" style="background:rgba(0,217,160,0.12)">📗</div>
+            <div style="flex:1"><div class="bk-ttl">Atomic Habits</div><div class="bk-au">James Clear</div>
+              <div class="bk-br"><div class="bk-fl" style="width:45%"></div></div><div class="bk-pc">45% • 116/256 bet</div></div>
+          </div>
+          <div class="rd-it">
+            <div class="bk-cv" style="background:rgba(160,100,255,0.12)">📙</div>
+            <div style="flex:1"><div class="bk-ttl">Deep Work</div><div class="bk-au">Cal Newport</div>
+              <div class="bk-br"><div class="bk-fl" style="width:12%"></div></div><div class="bk-pc">12% • 29/304 bet</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CHAT INPUT -->
+  <div class="chat-area">
+    <div class="chat-wrap">
+      <div class="c-plus">+</div>
+      <input class="c-inp" type="text" placeholder="BrainOS AI ga savol yozing..." id="chatInp">
+      <div class="c-mdl">Sonnet 4.6 ▾</div>
+      <button class="c-snd" onclick="sendChat()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// GREETING
+(function(){
+  const h=new Date().getHours();
+  const d=h<12?['☀️','Xayrli tong','Bugun 5 ta vazifa kutmoqda. Ulardan 2 tasi muhim — keling boshlaylik!']
+           :h<17?['🌤️','Xayrli kun','Tushlik vaqti! Qolgan vazifalarni davom ettiramizmi?']
+           :h<21?['🌇','Xayrli kech','Bugungi natijalar yaxshi. Yana 2 ta vazifa qoldi.']
+                :['🌙','Xayrli tun','Dam olish vaqti. Ertangi rejalarni belgilab qo\'ying.'];
+  document.getElementById('grEm').textContent=d[0];
+  document.getElementById('grWd').textContent=d[1];
+  document.getElementById('grMsg').textContent=d[2];
+})();
+
+// NAV
+function nav(el,title){
+  document.querySelectorAll('.s-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pgTitle').textContent=title;
+}
+
+// TASK TOGGLE
+function toggleTask(row){
+  const ck=row.querySelector('.t-ck'),nm=row.querySelector('.t-nm');
+  if(ck.classList.contains('done')){ck.classList.remove('done');ck.textContent='';nm.classList.remove('done');}
+  else{ck.classList.add('done');ck.textContent='✓';nm.classList.add('done');}
+  updateTaskCount();
+}
+function updateTaskCount(){
+  const all=document.querySelectorAll('#taskList .task').length;
+  const done=document.querySelectorAll('#taskList .t-ck.done').length;
+  document.getElementById('taskCount').textContent=(all-done)+' ta qoldi';
+}
+
+// ADD TASK
+function addTask(){
+  const name=prompt('Yangi vazifa:');
+  if(!name||!name.trim())return;
+  const list=document.getElementById('taskList');
+  const div=document.createElement('div');
+  div.className='task';div.onclick=()=>toggleTask(div);
+  div.innerHTML=`<div class="t-ck"></div>
+    <div class="t-bd"><div class="t-nm">${name.trim()}</div>
+      <div class="t-mt"><span class="t-tg" style="background:rgba(139,163,194,0.12);color:#8BA3C2">Yangi</span>
+      <span class="t-tm">⏰ Hozir</span></div></div>
+    <div class="t-dt" style="background:var(--accent)"></div>`;
+  list.appendChild(div);
+  updateTaskCount();
+}
+
+// CALENDAR
+const MNS=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+const EVS=[3,7,12,19,22,28];
+let cY=2026,cM=4;
+function renderCal(){
+  document.getElementById('calMn').textContent=MNS[cM]+' '+cY;
+  const g=document.getElementById('calG');
+  const lbs=[...g.querySelectorAll('.cal-lb')];
+  g.innerHTML='';lbs.forEach(l=>g.appendChild(l));
+  const fd=new Date(cY,cM,1).getDay();
+  const off=fd===0?6:fd-1;
+  const dim=new Date(cY,cM,0).getDate();
+  const days=new Date(cY,cM+1,0).getDate();
+  const td=new Date();
+  for(let i=0;i<off;i++){const d=document.createElement('div');d.className='cal-d dim';d.textContent=dim-off+1+i;g.appendChild(d);}
+  for(let d=1;d<=days;d++){
+    const el=document.createElement('div');el.className='cal-d';el.textContent=d;
+    if(d===td.getDate()&&cM===td.getMonth()&&cY===td.getFullYear())el.classList.add('today');
+    if(EVS.includes(d))el.classList.add('ev');
+    g.appendChild(el);
+  }
+}
+function calPrev(){cM--;if(cM<0){cM=11;cY--;}renderCal();}
+function calNext(){cM++;if(cM>11){cM=0;cY++;}renderCal();}
+renderCal();
+
+// CHAT
+function sendChat(){
+  const inp=document.getElementById('chatInp');
+  if(!inp.value.trim())return;
+  window.location.href='chat.html?q='+encodeURIComponent(inp.value.trim());
+}
+document.getElementById('chatInp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+</script>
+</body>
+</html>

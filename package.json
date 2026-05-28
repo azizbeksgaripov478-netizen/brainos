@@ -1,15 +1,23 @@
 {
   "name": "brainos",
-  "version":  "1.0.0",
+  "version": "1.0.0",
+  "description": "BrainOS — AI yordamchi platforma",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.105.4",
+    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
-    "groq-sdk": "^1.2.0",
-    "openai": "^6.38.0"
+    "express": "^4.19.2",
+    "groq-sdk": "^1.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }

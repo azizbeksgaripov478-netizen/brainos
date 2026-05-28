@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — AI Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg:      #050A14;
+  --bg2:     #07101F;
+  --surface: #0D1B33;
+  --card:    #0A172B;
+  --border:  #162840;
+  --border2: #1E3555;
+  --accent:  #2E7CF6;
+  --accent2: #00D9A0;
+  --warn:    #F6A32E;
+  --danger:  #F65C2E;
+  --text:    #EFF4FF;
+  --muted:   #7A9BBF;
+  --muted2:  #3D5A7A;
+  --sw:      230px;
+}
+
+html, body { height:100%; overflow:hidden; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); display:flex; }
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+
+.g1,.g2 { position:fixed; pointer-events:none; z-index:0; border-radius:50%; }
+.g1 { width:600px;height:600px;top:-150px;left:-100px;
+  background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%); }
+.g2 { width:450px;height:450px;bottom:-80px;right:-60px;
+  background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width:var(--sw); flex-shrink:0; height:100vh;
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; position:relative; z-index:10;
+}
+.s-logo { padding:20px 16px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.s-mark {
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#2E7CF6,#00D9A0);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;
+}
+.s-name {
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  background:linear-gradient(135deg,#2E7CF6,#00D9A0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.s-nav { flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px; }
+.s-sec { font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px; }
+.s-item {
+  display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;
+  color:var(--muted);font-size:13.5px;transition:all 0.17s;position:relative;user-select:none;text-decoration:none;
+}
+.s-item:hover { background:rgba(46,124,246,0.07);color:var(--text); }
+.s-item.active { background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500; }
+.s-item.active::before { content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 3px 3px 0;background:var(--accent); }
+.s-ico { font-size:15px;width:18px;text-align:center;flex-shrink:0; }
+.s-badge { margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center; }
+.sb-b { background:rgba(46,124,246,0.25);color:#7AB3FF; }
+.sb-w { background:rgba(246,163,46,0.2);color:var(--warn); }
+.s-user { padding:10px 8px;border-top:1px solid var(--border); }
+.u-row { display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.17s; }
+.u-row:hover { background:rgba(255,255,255,0.04); }
+.u-av { width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff; }
+.u-nm { font-size:13px;font-weight:600; }
+.u-pl { font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px; }
+.u-dt { width:5px;height:5px;border-radius:50%;background:var(--accent2); }
+.u-mo { margin-left:auto;color:var(--muted2);font-size:16px; }
+
+/* ── CHAT HISTORY SIDEBAR ── */
+.chat-hist {
+  width:220px; flex-shrink:0; height:100vh;
+  background:var(--bg2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:9;
+}
+.ch-top { padding:16px 14px 12px; border-bottom:1px solid var(--border); }
+.ch-top-title { font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:10px; }
+.new-chat-btn {
+  width:100%;padding:9px;border-radius:9px;
+  background:linear-gradient(135deg,#2E7CF6,#1660D0);
+  border:none;color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all 0.17s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.new-chat-btn:hover { transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,124,246,0.35); }
+.ch-list { flex:1;overflow-y:auto;padding:10px 8px;display:flex;flex-direction:column;gap:2px; }
+.ch-sec { font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;padding:8px 6px 4px; }
+.ch-item {
+  padding:9px 10px;border-radius:8px;cursor:pointer;
+  transition:all 0.17s;position:relative;
+}
+.ch-item:hover { background:rgba(255,255,255,0.04); }
+.ch-item.active { background:rgba(46,124,246,0.10); }
+.ch-item-title { font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.ch-item-sub { font-size:11px;color:var(--muted2); }
+.ch-item-del {
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  opacity:0;font-size:12px;color:var(--muted2);transition:opacity 0.15s;
+  background:var(--surface);border:1px solid var(--border);border-radius:4px;
+  padding:1px 5px;cursor:pointer;
+}
+.ch-item:hover .ch-item-del { opacity:1; }
+
+/* ── MAIN ── */
+.main { flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1; }
+
+/* TOPBAR */
+.topbar {
+  height:56px;flex-shrink:0;padding:0 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);
+}
+.tb-ttl { font-family:'Syne',sans-serif;font-size:15px;font-weight:700; }
+.tb-sp { flex:1; }
+.tb-model {
+  display:flex;align-items:center;gap:6px;padding:6px 12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.17s;
+}
+.tb-model:hover { border-color:var(--border2);color:var(--text); }
+.tb-model-dot { width:7px;height:7px;border-radius:50%;background:var(--accent2);animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.tb-btn {
+  width:34px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--muted);transition:all 0.17s;
+}
+.tb-btn:hover { border-color:var(--border2);color:var(--text); }
+
+/* MESSAGES AREA */
+.msgs-area { flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px; }
+
+/* WELCOME STATE */
+.welcome {
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px 24px;animation:fup 0.5s ease both;
+}
+.wl-logo { font-size:52px;margin-bottom:20px; }
+.wl-title { font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px; }
+.wl-title span { background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+.wl-sub { font-size:15px;color:var(--muted);max-width:460px;line-height:1.6;margin-bottom:36px; }
+.wl-suggestions { display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:560px; }
+.wl-sug {
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;cursor:pointer;transition:all 0.2s;text-align:left;
+}
+.wl-sug:hover { border-color:rgba(46,124,246,0.4);transform:translateY(-2px);background:rgba(46,124,246,0.06); }
+.wl-sug-icon { font-size:20px;margin-bottom:8px;display:block; }
+.wl-sug-text { font-size:13px;font-weight:500;color:var(--text);line-height:1.4; }
+
+/* MESSAGE BUBBLES */
+.msg { display:flex;gap:12px;animation:fup 0.3s ease both;max-width:800px; }
+.msg.user { flex-direction:row-reverse;align-self:flex-end; }
+.msg.user .msg-bubble {
+  background:linear-gradient(135deg,rgba(46,124,246,0.2),rgba(46,124,246,0.12));
+  border:1px solid rgba(46,124,246,0.3);border-radius:16px 4px 16px 16px;
+}
+.msg.ai .msg-bubble {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:4px 16px 16px 16px;
+}
+.msg-av {
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  margin-top:2px;
+}
+.msg-av.ai-av { background:linear-gradient(135deg,#2E7CF6,#00D9A0); }
+.msg-av.user-av { background:linear-gradient(135deg,#2E7CF6,#00D9A0);font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff; }
+.msg-content { display:flex;flex-direction:column;gap:4px;max-width:680px; }
+.msg-name { font-size:11.5px;font-weight:600;color:var(--muted2); }
+.msg.user .msg-name { text-align:right; }
+.msg-bubble { padding:13px 16px; }
+.msg-text { font-size:14px;line-height:1.65;color:var(--text); }
+.msg-text p { margin-bottom:8px; }
+.msg-text p:last-child { margin-bottom:0; }
+.msg-text code {
+  background:rgba(46,124,246,0.12);border:1px solid rgba(46,124,246,0.2);
+  border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace;color:#7AB3FF;
+}
+.msg-text pre {
+  background:rgba(5,10,20,0.8);border:1px solid var(--border);
+  border-radius:8px;padding:12px 14px;overflow-x:auto;margin:8px 0;
+}
+.msg-text pre code { background:transparent;border:none;padding:0;color:#00D9A0;font-size:13px; }
+.msg-time { font-size:10.5px;color:var(--muted2); }
+.msg.user .msg-time { text-align:right; }
+.msg-actions { display:flex;gap:6px;margin-top:6px;opacity:0;transition:opacity 0.2s; }
+.msg:hover .msg-actions { opacity:1; }
+.msg-act-btn {
+  padding:3px 8px;border-radius:5px;font-size:11px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);cursor:pointer;transition:all 0.15s;
+}
+.msg-act-btn:hover { color:var(--text);border-color:var(--border2); }
+
+/* TYPING INDICATOR */
+.typing { display:flex;gap:12px;animation:fup 0.3s ease both; }
+.typing-bubble {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:4px 16px 16px 16px;padding:13px 18px;
+  display:flex;align-items:center;gap:5px;
+}
+.typing-dot { width:7px;height:7px;border-radius:50%;background:var(--muted);animation:tdot 1.4s infinite; }
+.typing-dot:nth-child(2) { animation-delay:0.2s; }
+.typing-dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes tdot { 0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)} }
+
+/* INPUT AREA */
+.input-area {
+  flex-shrink:0;padding:14px 24px 18px;
+  background:rgba(5,10,20,0.88);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+}
+.input-tools { display:flex;gap:6px;margin-bottom:10px; }
+.tool-btn {
+  padding:5px 10px;border-radius:7px;font-size:12px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--border);cursor:pointer;
+  transition:all 0.17s;display:flex;align-items:center;gap:5px;
+}
+.tool-btn:hover { color:var(--text);border-color:var(--border2); }
+.input-wrap {
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  display:flex;align-items:flex-end;gap:10px;padding:12px 14px;transition:border-color 0.2s;
+}
+.input-wrap:focus-within { border-color:rgba(46,124,246,0.42); }
+.c-plus {
+  width:28px;height:28px;border-radius:8px;background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--muted);
+  cursor:pointer;flex-shrink:0;transition:all 0.17s;margin-bottom:2px;
+}
+.c-plus:hover { border-color:var(--accent);color:var(--accent); }
+.c-textarea {
+  flex:1;background:transparent;border:none;outline:none;color:var(--text);
+  font-size:14px;font-family:'DM Sans',sans-serif;resize:none;min-height:24px;max-height:120px;
+  line-height:1.5;
+}
+.c-textarea::placeholder { color:var(--muted2); }
+.c-bottom { display:flex;align-items:center;gap:8px;flex-shrink:0;margin-bottom:2px; }
+.c-send {
+  width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2E7CF6,#1660D0);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:#fff;transition:all 0.17s;
+}
+.c-send:hover { transform:scale(1.07);box-shadow:0 4px 14px rgba(46,124,246,0.4); }
+.c-send:disabled { opacity:0.4;transform:none;box-shadow:none;cursor:not-allowed; }
+.c-hint { font-size:11px;color:var(--muted2);text-align:center;margin-top:8px; }
+
+@keyframes fup { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="s-mark">B</div>
+    <span class="s-name">BrainOS</span>
+  </div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <a class="s-item" href="dashboard.html"><span class="s-ico">🏠</span>Dashboard</a>
+    <div class="s-item active"><span class="s-ico">💬</span>AI Chat<span class="s-badge sb-b">3</span></div>
+    <a class="s-item" href="notes.html"><span class="s-ico">📝</span>Qaydlar</a>
+    <a class="s-item" href="plan.html"><span class="s-ico">📅</span>Kunlik reja<span class="s-badge sb-w">2</span></a>
+    <a class="s-item" href="reminders.html"><span class="s-ico">⏰</span>Eslatmalar</a>
+    <div class="s-sec" style="margin-top:6px">Rivojlanish</div>
+    <a class="s-item" href="#"><span class="s-ico">🎯</span>Odatlar</a>
+    <a class="s-item" href="reading.html"><span class="s-ico">📚</span>O'qish</a>
+    <a class="s-item" href="finance.html"><span class="s-ico">💰</span>Moliya</a>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <a class="s-item" href="#"><span class="s-ico">📊</span>Statistika</a>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user">
+    <div class="u-row">
+      <div class="u-av">AK</div>
+      <div><div class="u-nm">Azizbek</div><div class="u-pl"><span class="u-dt"></span>Free plan</div></div>
+      <div class="u-mo">⋯</div>
+    </div>
+  </div>
+</aside>
+
+<!-- CHAT HISTORY -->
+<div class="chat-hist">
+  <div class="ch-top">
+    <div class="ch-top-title">Suhbatlar</div>
+    <button class="new-chat-btn" onclick="newChat()">✏️ Yangi suhbat</button>
+  </div>
+  <div class="ch-list" id="chatList">
+    <div class="ch-sec">Bugun</div>
+    <div class="ch-item active" onclick="loadChat(this,'BrainOS haqida')">
+      <div class="ch-item-title">BrainOS haqida</div>
+      <div class="ch-item-sub">Bugun, 14:32</div>
+      <span class="ch-item-del" onclick="delChat(event,this)">✕</span>
+    </div>
+    <div class="ch-item" onclick="loadChat(this,'Dashboard dizayn')">
+      <div class="ch-item-title">Dashboard dizayn</div>
+      <div class="ch-item-sub">Bugun, 11:15</div>
+      <span class="ch-item-del" onclick="delChat(event,this)">✕</span>
+    </div>
+    <div class="ch-sec">Kecha</div>
+    <div class="ch-item" onclick="loadChat(this,'JavaScript ES6')">
+      <div class="ch-item-title">JavaScript ES6 nima</div>
+      <div class="ch-item-sub">Kecha, 20:45</div>
+      <span class="ch-item-del" onclick="delChat(event,this)">✕</span>
+    </div>
+    <div class="ch-item" onclick="loadChat(this,'Supabase sozlash')">
+      <div class="ch-item-title">Supabase sozlash</div>
+      <div class="ch-item-sub">Kecha, 18:20</div>
+      <span class="ch-item-del" onclick="delChat(event,this)">✕</span>
+    </div>
+    <div class="ch-sec">Oldingi</div>
+    <div class="ch-item" onclick="loadChat(this,'Atomic Habits')">
+      <div class="ch-item-title">Atomic Habits tahlil</div>
+      <div class="ch-item-sub">17 may</div>
+      <span class="ch-item-del" onclick="delChat(event,this)">✕</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-ttl" id="chatTitle">AI Chat</span>
+    <div class="tb-sp"></div>
+    <div class="tb-model">
+      <span class="tb-model-dot"></span>
+      <span id="modelName">Sonnet 4.6</span>
+      <span style="font-size:10px;color:var(--muted2)">▾</span>
+    </div>
+    <div class="tb-btn" title="Eksport" onclick="exportChat()">📥</div>
+    <div class="tb-btn" title="Tozalash" onclick="clearChat()">🗑️</div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="msgs-area" id="msgsArea">
+
+    <!-- WELCOME -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="wl-logo">🧠</div>
+      <div class="wl-title">BrainOS <span>AI</span> bilan suhbat</div>
+      <p class="wl-sub">Har qanday savol yozing — kod, ta'rif, tarjima, reja, tahlil va ko'proq narsalar uchun AI yordamchi doim tayyor.</p>
+      <div class="wl-suggestions">
+        <div class="wl-sug" onclick="useSuggestion(this)">
+          <span class="wl-sug-icon">💡</span>
+          <div class="wl-sug-text">Bugungi rejamni optimallashtirishga yordam ber</div>
+        </div>
+        <div class="wl-sug" onclick="useSuggestion(this)">
+          <span class="wl-sug-icon">💻</span>
+          <div class="wl-sug-text">JavaScript async/await ni tushuntir</div>
+        </div>
+        <div class="wl-sug" onclick="useSuggestion(this)">
+          <span class="wl-sug-icon">📝</span>
+          <div class="wl-sug-text">Menga yangi loyiha g'oyalari taklif qil</div>
+        </div>
+        <div class="wl-sug" onclick="useSuggestion(this)">
+          <span class="wl-sug-icon">📚</span>
+          <div class="wl-sug-text">O'qish rejamni tuzishga yordam ber</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area">
+    <div class="input-tools">
+      <div class="tool-btn">📎 Fayl</div>
+      <div class="tool-btn">🌐 Web qidiruv</div>
+      <div class="tool-btn">🖼️ Rasm</div>
+      <div class="tool-btn">💻 Kod</div>
+    </div>
+    <div class="input-wrap">
+      <div class="c-plus" onclick="document.getElementById('fileInput').click()">+</div>
+      <input type="file" id="fileInput" style="display:none">
+      <textarea class="c-textarea" id="msgInput" placeholder="BrainOS AI ga xabar yozing..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <div class="c-bottom">
+        <button class="c-send" id="sendBtn" onclick="sendMessage()">↑</button>
+      </div>
+    </div>
+    <div class="c-hint">Enter — yuborish &nbsp;|&nbsp; Shift+Enter — yangi qator</div>
+  </div>
+</div>
+
+<script>
+const AI_URL = '/chat'; // backend endpoint
+let isTyping = false;
+let msgHistory = [];
+
+// URL dan savol olish
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (q) {
+    document.getElementById('msgInput').value = q;
+    setTimeout(() => sendMessage(), 300);
+  }
+});
+
+// TEXTAREA AUTO RESIZE
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// HANDLE ENTER KEY
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+// TIME
+function getTime() {
+  return new Date().toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit' });
+}
+
+// HIDE WELCOME
+function hideWelcome() {
+  const w = document.getElementById('welcomeScreen');
+  if (w) w.style.display = 'none';
+}
+
+// SUGGESTION
+function useSuggestion(el) {
+  const txt = el.querySelector('.wl-sug-text').textContent;
+  document.getElementById('msgInput').value = txt;
+  document.getElementById('msgInput').focus();
+}
+
+// ADD MESSAGE TO DOM
+function addMessage(role, text) {
+  hideWelcome();
+  const area = document.getElementById('msgsArea');
+  const isUser = role === 'user';
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const av = isUser
+    ? `<div class="msg-av user-av">AK</div>`
+    : `<div class="msg-av ai-av">🧠</div>`;
+
+  const name = isUser ? 'Siz' : 'BrainOS AI';
+  const formatted = formatText(text);
+
+  div.innerHTML = `
+    ${av}
+    <div class="msg-content">
+      <div class="msg-name">${name}</div>
+      <div class="msg-bubble"><div class="msg-text">${formatted}</div></div>
+      <div class="msg-time">${getTime()}</div>
+      <div class="msg-actions">
+        <div class="msg-act-btn" onclick="copyMsg(this)">📋 Nusxa</div>
+        ${!isUser ? '<div class="msg-act-btn" onclick="regenMsg()">🔄 Qayta</div>' : ''}
+      </div>
+    </div>`;
+
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+// FORMAT TEXT (markdown-like)
+function formatText(text) {
+  return text
+    .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>').replace(/$/, '</p>');
+}
+
+// SHOW TYPING
+function showTyping() {
+  const area = document.getElementById('msgsArea');
+  const div = document.createElement('div');
+  div.className = 'typing'; div.id = 'typingIndicator';
+  div.innerHTML = `<div class="msg-av ai-av">🧠</div>
+    <div class="typing-bubble">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+// SEND MESSAGE
+async function sendMessage() {
+  if (isTyping) return;
+  const inp = document.getElementById('msgInput');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+
+  addMessage('user', text);
+  msgHistory.push({ role: 'user', content: text });
+
+  isTyping = true;
+  showTyping();
+
+  try {
+    const res = await fetch(AI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, history: msgHistory.slice(-10) })
+    });
+
+    hideTyping();
+
+    if (!res.ok) throw new Error('Server xatosi');
+
+    const data = await res.json();
+    const reply = data.reply || data.message || 'Xatolik yuz berdi.';
+
+    addMessage('ai', reply);
+    msgHistory.push({ role: 'assistant', content: reply });
+
+    // chat history ga qo'shish
+    addToHistory(text.slice(0, 30) + (text.length > 30 ? '...' : ''));
+
+  } catch (err) {
+    hideTyping();
+    addMessage('ai', 'Uzr, server bilan bog\'lanishda xatolik yuz berdi. Backend ishlaayotganini tekshiring.');
+  }
+
+  isTyping = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('msgInput').focus();
+}
+
+// ADD TO CHAT HISTORY
+function addToHistory(title) {
+  const list = document.getElementById('chatList');
+  // eski activelarni olib tashla
+  list.querySelectorAll('.ch-item').forEach(i => i.classList.remove('active'));
+
+  // bugun bo'limi mavjudligini tekshir
+  let todaySec = list.querySelector('.ch-sec');
+  if (!todaySec || todaySec.textContent !== 'Bugun') {
+    const sec = document.createElement('div');
+    sec.className = 'ch-sec'; sec.textContent = 'Bugun';
+    list.insertBefore(sec, list.firstChild);
+    todaySec = sec;
+  }
+
+  const item = document.createElement('div');
+  item.className = 'ch-item active';
+  item.onclick = () => loadChat(item, title);
+  item.innerHTML = `<div class="ch-item-title">${title}</div>
+    <div class="ch-item-sub">Hozir</div>
+    <span class="ch-item-del" onclick="delChat(event,this)">✕</span>`;
+  todaySec.after(item);
+}
+
+// LOAD CHAT
+function loadChat(el, title) {
+  document.querySelectorAll('.ch-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('chatTitle').textContent = title;
+}
+
+// DELETE CHAT
+function delChat(e, btn) {
+  e.stopPropagation();
+  btn.closest('.ch-item').remove();
+}
+
+// NEW CHAT
+function newChat() {
+  msgHistory = [];
+  const area = document.getElementById('msgsArea');
+  area.innerHTML = '';
+
+  const welcome = document.createElement('div');
+  welcome.className = 'welcome'; welcome.id = 'welcomeScreen';
+  welcome.innerHTML = `
+    <div class="wl-logo">🧠</div>
+    <div class="wl-title">BrainOS <span>AI</span> bilan suhbat</div>
+    <p class="wl-sub">Har qanday savol yozing — kod, ta'rif, tarjima, reja, tahlil va ko'proq.</p>
+    <div class="wl-suggestions">
+      <div class="wl-sug" onclick="useSuggestion(this)"><span class="wl-sug-icon">💡</span><div class="wl-sug-text">Bugungi rejamni optimallashtirishga yordam ber</div></div>
+      <div class="wl-sug" onclick="useSuggestion(this)"><span class="wl-sug-icon">💻</span><div class="wl-sug-text">JavaScript async/await ni tushuntir</div></div>
+      <div class="wl-sug" onclick="useSuggestion(this)"><span class="wl-sug-icon">📝</span><div class="wl-sug-text">Menga yangi loyiha g'oyalari taklif qil</div></div>
+      <div class="wl-sug" onclick="useSuggestion(this)"><span class="wl-sug-icon">📚</span><div class="wl-sug-text">O'qish rejamni tuzishga yordam ber</div></div>
+    </div>`;
+  area.appendChild(welcome);
+  document.querySelectorAll('.ch-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('chatTitle').textContent = 'Yangi suhbat';
+}
+
+// CLEAR CHAT
+function clearChat() {
+  if (confirm('Suhbatni tozalashni xohlaysizmi?')) newChat();
+}
+
+// COPY MESSAGE
+function copyMsg(btn) {
+  const text = btn.closest('.msg-content').querySelector('.msg-text').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Nusxalandi';
+    setTimeout(() => btn.textContent = '📋 Nusxa', 2000);
+  });
+}
+
+// REGEN
+function regenMsg() {
+  if (msgHistory.length < 2) return;
+  const lastUser = [...msgHistory].reverse().find(m => m.role === 'user');
+  if (!lastUser) return;
+  // oxirgi AI xabarini olib tashlash
+  const msgs = document.querySelectorAll('.msg.ai');
+  if (msgs.length) msgs[msgs.length - 1].remove();
+  msgHistory = msgHistory.filter((m, i) => !(i === msgHistory.length - 1 && m.role === 'assistant'));
+  document.getElementById('msgInput').value = lastUser.content;
+  sendMessage();
+}
+
+// EXPORT
+function exportChat() {
+  const msgs = document.querySelectorAll('.msg');
+  let text = 'BrainOS AI Chat — ' + new Date().toLocaleDateString('uz') + '\n\n';
+  msgs.forEach(m => {
+    const name = m.querySelector('.msg-name')?.innerText || '';
+    const content = m.querySelector('.msg-text')?.innerText || '';
+    const time = m.querySelector('.msg-time')?.innerText || '';
+    text += `[${time}] ${name}:\n${content}\n\n`;
+  });
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = 'brainos-chat-' + Date.now() + '.txt';
+  a.click();
+}
+</script>
+</body>
+</html>

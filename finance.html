@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — Moliya</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050A14;--bg2:#07101F;--surface:#0D1B33;--card:#0A172B;
+  --border:#162840;--border2:#1E3555;--accent:#2E7CF6;--accent2:#00D9A0;
+  --warn:#F6A32E;--danger:#F65C2E;--purple:#A064FF;
+  --text:#EFF4FF;--muted:#7A9BBF;--muted2:#3D5A7A;--sw:230px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.g1,.g2{position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+.g1{width:600px;height:600px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%);}
+.g2{width:450px;height:450px;bottom:-80px;right:-60px;background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%);}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;}
+.s-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.s-mark{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.s-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.s-nav{flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px;}
+.s-sec{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px;}
+.s-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13.5px;transition:all 0.17s;position:relative;user-select:none;text-decoration:none;}
+.s-item:hover{background:rgba(46,124,246,0.07);color:var(--text);}
+.s-item.active{background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500;}
+.s-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 3px 3px 0;background:var(--accent);}
+.s-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.s-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;}
+.sb-b{background:rgba(46,124,246,0.25);color:#7AB3FF;}.sb-w{background:rgba(246,163,46,0.2);color:var(--warn);}
+.s-user{padding:10px 8px;border-top:1px solid var(--border);}
+.u-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.17s;}
+.u-row:hover{background:rgba(255,255,255,0.04);}
+.u-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;}
+.u-nm{font-size:13px;font-weight:600;}.u-pl{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px;}
+.u-dt{width:5px;height:5px;border-radius:50%;background:var(--accent2);}.u-mo{margin-left:auto;color:var(--muted2);font-size:16px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+.topbar{height:56px;flex-shrink:0;padding:0 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);}
+.tb-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.tb-sp{flex:1;}
+.period-btns{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;}
+.period-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.period-btn.active{background:var(--accent);color:#fff;}
+.tb-btn{width:34px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--muted);transition:all 0.17s;flex-shrink:0;}
+.tb-btn:hover{border-color:var(--border2);color:var(--text);}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px 28px;display:flex;flex-direction:column;gap:20px;}
+
+/* BALANCE CARD */
+.balance-card{background:linear-gradient(135deg,rgba(46,124,246,0.15),rgba(0,217,160,0.08));border:1px solid rgba(46,124,246,0.25);border-radius:16px;padding:24px 28px;display:flex;align-items:center;gap:24px;animation:fup 0.4s ease both;position:relative;overflow:hidden;}
+.balance-card::after{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(46,124,246,0.10),transparent 65%);pointer-events:none;}
+.bal-left{flex:1;}
+.bal-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.bal-amount{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:6px;}
+.bal-amount span{background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.bal-change{font-size:13px;display:flex;align-items:center;gap:6px;}
+.bal-up{color:var(--accent2);}
+.bal-right{display:flex;gap:20px;}
+.bal-stat{text-align:center;}
+.bal-stat-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:2px;}
+.bal-stat-lbl{font-size:11px;color:var(--muted);}
+.bal-divider{width:1px;background:rgba(255,255,255,0.08);}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;animation:fup 0.4s 0.07s ease both;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;transition:all 0.2s;position:relative;overflow:hidden;}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.sc-icon{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.sc-label{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+.sc-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px;}
+.sc-sub{font-size:11.5px;font-weight:500;}
+
+/* MAIN GRID */
+.fin-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;animation:fup 0.4s 0.14s ease both;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.c-hd{padding:15px 18px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.c-ic{font-size:15px;}
+.c-ttl{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;}
+.c-sub{font-size:11.5px;color:var(--muted);}
+.c-act{margin-left:auto;font-size:12px;color:var(--accent);cursor:pointer;font-weight:500;transition:opacity 0.17s;}
+.c-act:hover{opacity:0.7;}
+.c-bd{padding:14px 18px;}
+
+/* TRANSACTIONS */
+.txn-filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.txn-filter{padding:4px 10px;border-radius:15px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.txn-filter:hover{color:var(--text);}
+.txn-filter.active{background:rgba(46,124,246,0.15);color:#7AB3FF;border-color:rgba(46,124,246,0.3);}
+
+.txn-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(22,40,64,0.5);transition:all 0.15s;cursor:pointer;border-radius:6px;}
+.txn-item:last-child{border-bottom:none;}
+.txn-item:hover{background:rgba(46,124,246,0.04);padding-left:6px;}
+.txn-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.txn-body{flex:1;}
+.txn-name{font-size:13.5px;font-weight:500;margin-bottom:2px;}
+.txn-meta{display:flex;gap:8px;align-items:center;}
+.txn-cat{font-size:10.5px;padding:1px 7px;border-radius:5px;font-weight:600;}
+.txn-date{font-size:11.5px;color:var(--muted2);}
+.txn-amount{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;flex-shrink:0;}
+.txn-out{color:var(--danger);}
+.txn-in{color:var(--accent2);}
+
+/* CHART */
+.chart-wrap{padding:16px 18px 8px;}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-bottom:8px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;}
+.chart-bar-inner{flex:1;width:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;}
+.bar-in{border-radius:4px 4px 0 0;background:rgba(0,217,160,0.4);transition:height 0.8s ease;min-height:2px;}
+.bar-out{border-radius:4px 4px 0 0;background:rgba(246,92,46,0.5);transition:height 0.8s ease;min-height:2px;}
+.bar-label{font-size:10px;color:var(--muted2);text-align:center;}
+.chart-legend{display:flex;gap:14px;justify-content:center;margin-top:6px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);}
+.legend-dot{width:8px;height:8px;border-radius:2px;}
+
+/* CATEGORIES PIE */
+.cat-list{display:flex;flex-direction:column;gap:10px;}
+.cat-item{display:flex;align-items:center;gap:10px;}
+.cat-ico{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
+.cat-name{font-size:13px;font-weight:500;flex:1;}
+.cat-bar-wrap{flex:2;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.cat-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.cat-pct{font-size:12px;font-weight:600;color:var(--muted);width:36px;text-align:right;}
+.cat-amt{font-size:12px;color:var(--muted2);width:70px;text-align:right;}
+
+/* BUDGET */
+.budget-item{margin-bottom:14px;}
+.budget-item:last-child{margin-bottom:0;}
+.budget-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.budget-name{font-size:13px;font-weight:500;}
+.budget-nums{font-size:12px;color:var(--muted);}
+.budget-bar{height:6px;background:var(--border);border-radius:4px;overflow:hidden;}
+.budget-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+.budget-warn{color:var(--danger);}
+
+/* GOALS */
+.goal-item{background:rgba(13,27,51,0.7);border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:10px;transition:all 0.17s;cursor:pointer;}
+.goal-item:hover{border-color:var(--border2);}
+.goal-item:last-child{margin-bottom:0;}
+.goal-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.goal-ico{font-size:20px;}
+.goal-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+.goal-pct{font-size:12px;font-weight:700;}
+.goal-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.goal-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.goal-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);}
+
+/* ADD BTN */
+.fab{position:fixed;right:24px;bottom:24px;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#2E7CF6,#1660D8);box-shadow:0 6px 20px rgba(46,124,246,0.4);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;cursor:pointer;transition:all 0.2s;z-index:50;}
+.fab:hover{transform:scale(1.08) translateY(-2px);box-shadow:0 8px 24px rgba(46,124,246,0.5);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:400px;max-width:90vw;animation:fup 0.2s ease both;}
+.modal h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;}
+.m-row{margin-bottom:12px;}
+.m-label{font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+.m-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;}
+.m-inp:focus{border-color:rgba(46,124,246,0.4);}
+.m-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;}
+.type-btns{display:flex;gap:6px;}
+.type-btn{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.17s;font-family:'DM Sans',sans-serif;text-align:center;}
+.type-btn.out.active{background:rgba(246,92,46,0.15);color:var(--danger);border-color:rgba(246,92,46,0.3);}
+.type-btn.inc.active{background:rgba(0,217,160,0.12);color:var(--accent2);border-color:rgba(0,217,160,0.3);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.m-cancel{padding:8px 16px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.m-ok{padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+@keyframes fup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo"><div class="s-mark">B</div><span class="s-name">BrainOS</span></div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <a class="s-item" href="dashboard.html"><span class="s-ico">🏠</span>Dashboard</a>
+    <a class="s-item" href="chat.html"><span class="s-ico">💬</span>AI Chat<span class="s-badge sb-b">3</span></a>
+    <a class="s-item" href="notes.html"><span class="s-ico">📝</span>Qaydlar</a>
+    <a class="s-item" href="plan.html"><span class="s-ico">📅</span>Kunlik reja<span class="s-badge sb-w">2</span></a>
+    <a class="s-item" href="reminders.html"><span class="s-ico">⏰</span>Eslatmalar</a>
+    <div class="s-sec" style="margin-top:6px">Rivojlanish</div>
+    <a class="s-item" href="#"><span class="s-ico">🎯</span>Odatlar</a>
+    <a class="s-item" href="reading.html"><span class="s-ico">📚</span>O'qish</a>
+    <div class="s-item active"><span class="s-ico">💰</span>Moliya</div>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <a class="s-item" href="#"><span class="s-ico">📊</span>Statistika</a>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user"><div class="u-row"><div class="u-av">AK</div><div><div class="u-nm">Azizbek</div><div class="u-pl"><span class="u-dt"></span>Free plan</div></div><div class="u-mo">⋯</div></div></div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-ttl">Moliya</span>
+    <div class="tb-sp"></div>
+    <div class="period-btns">
+      <button class="period-btn" onclick="setPeriod(this,'week')">Hafta</button>
+      <button class="period-btn active" onclick="setPeriod(this,'month')">Oy</button>
+      <button class="period-btn" onclick="setPeriod(this,'year')">Yil</button>
+    </div>
+    <div class="tb-btn" title="Eksport" onclick="exportData()">📥</div>
+    <div class="tb-btn" title="AI tahlil" onclick="aiAnalyze()">🤖</div>
+  </div>
+
+  <div class="content">
+
+    <!-- BALANCE -->
+    <div class="balance-card">
+      <div class="bal-left">
+        <div class="bal-label">Umumiy balans</div>
+        <div class="bal-amount"><span id="totalBalance">12,450,000</span> so'm</div>
+        <div class="bal-change"><span class="bal-up">↑ +850,000 so'm</span> <span style="color:var(--muted)">bu oy</span></div>
+      </div>
+      <div class="bal-divider"></div>
+      <div class="bal-right">
+        <div class="bal-stat">
+          <div class="bal-stat-val" style="color:var(--accent2)" id="totalIncome">+3,200,000</div>
+          <div class="bal-stat-lbl">Daromad</div>
+        </div>
+        <div class="bal-stat">
+          <div class="bal-stat-val" style="color:var(--danger)" id="totalExpense">-2,350,000</div>
+          <div class="bal-stat-lbl">Xarajat</div>
+        </div>
+        <div class="bal-stat">
+          <div class="bal-stat-val" style="color:var(--warn)" id="totalSaved">+850,000</div>
+          <div class="bal-stat-lbl">Tejaldi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="sc-icon" style="background:rgba(0,217,160,0.10)">💼</div>
+        <div class="sc-label">Ish daromadi</div>
+        <div class="sc-val" style="color:var(--accent2)">2,500,000</div>
+        <div class="sc-sub" style="color:var(--accent2)">↑ +12%</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-icon" style="background:rgba(46,124,246,0.10)">💻</div>
+        <div class="sc-label">Freelance</div>
+        <div class="sc-val" style="color:#7AB3FF">700,000</div>
+        <div class="sc-sub" style="color:var(--accent2)">↑ +1 loyiha</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-icon" style="background:rgba(246,92,46,0.10)">🛒</div>
+        <div class="sc-label">Oziq-ovqat</div>
+        <div class="sc-val" style="color:var(--danger)">680,000</div>
+        <div class="sc-sub" style="color:var(--danger)">↑ +8%</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-icon" style="background:rgba(246,163,46,0.10)">🎯</div>
+        <div class="sc-label">Tejash maqsad</div>
+        <div class="sc-val" style="color:var(--warn)">32%</div>
+        <div class="sc-sub" style="color:var(--muted)">1,600,000 / 5,000,000</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="fin-grid">
+
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- CHART -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📊</span>
+            <span class="c-ttl">Daromad va xarajat</span>
+            <span class="c-sub">oxirgi 6 oy</span>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-bars" id="chartBars"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:rgba(0,217,160,0.6)"></div>Daromad</div>
+              <div class="legend-item"><div class="legend-dot" style="background:rgba(246,92,46,0.6)"></div>Xarajat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSACTIONS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">💳</span>
+            <span class="c-ttl">Tranzaksiyalar</span>
+            <span class="c-act" onclick="openModal()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd">
+            <div class="txn-filters">
+              <button class="txn-filter active" onclick="filterTxn(this,'all')">Hammasi</button>
+              <button class="txn-filter" onclick="filterTxn(this,'in')">Daromad</button>
+              <button class="txn-filter" onclick="filterTxn(this,'out')">Xarajat</button>
+            </div>
+            <div id="txnList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- CATEGORIES -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">🏷️</span>
+            <span class="c-ttl">Kategoriyalar</span>
+            <span class="c-sub">xarajatlar</span>
+          </div>
+          <div class="c-bd">
+            <div class="cat-list">
+              <div class="cat-item">
+                <span class="cat-ico">🛒</span>
+                <span class="cat-name">Oziq-ovqat</span>
+                <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:42%;background:linear-gradient(90deg,#F65C2E,#F6A32E)"></div></div>
+                <span class="cat-pct">42%</span>
+                <span class="cat-amt">680,000</span>
+              </div>
+              <div class="cat-item">
+                <span class="cat-ico">🏠</span>
+                <span class="cat-name">Uy</span>
+                <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:28%;background:linear-gradient(90deg,#2E7CF6,#A064FF)"></div></div>
+                <span class="cat-pct">28%</span>
+                <span class="cat-amt">450,000</span>
+              </div>
+              <div class="cat-item">
+                <span class="cat-ico">🚗</span>
+                <span class="cat-name">Transport</span>
+                <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:14%;background:linear-gradient(90deg,#A064FF,#2E7CF6)"></div></div>
+                <span class="cat-pct">14%</span>
+                <span class="cat-amt">230,000</span>
+              </div>
+              <div class="cat-item">
+                <span class="cat-ico">☕</span>
+                <span class="cat-name">Kafe & ovqat</span>
+                <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:9%;background:linear-gradient(90deg,#F6A32E,#00D9A0)"></div></div>
+                <span class="cat-pct">9%</span>
+                <span class="cat-amt">140,000</span>
+              </div>
+              <div class="cat-item">
+                <span class="cat-ico">📱</span>
+                <span class="cat-name">Texnologiya</span>
+                <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:7%;background:linear-gradient(90deg,#00D9A0,#2E7CF6)"></div></div>
+                <span class="cat-pct">7%</span>
+                <span class="cat-amt">110,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUDGET -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📋</span>
+            <span class="c-ttl">Byudjet</span>
+            <span class="c-sub">bu oy</span>
+            <span class="c-act" onclick="editBudget()">Tahrirlash</span>
+          </div>
+          <div class="c-bd">
+            <div class="budget-item">
+              <div class="budget-top"><span class="budget-name">🛒 Oziq-ovqat</span><span class="budget-nums">680,000 / <span style="color:var(--accent2)">800,000</span></span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:85%;background:linear-gradient(90deg,#F6A32E,#F65C2E)"></div></div>
+            </div>
+            <div class="budget-item">
+              <div class="budget-top"><span class="budget-name">🚗 Transport</span><span class="budget-nums">230,000 / <span style="color:var(--accent2)">300,000</span></span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:77%;background:linear-gradient(90deg,#F6A32E,#2E7CF6)"></div></div>
+            </div>
+            <div class="budget-item">
+              <div class="budget-top"><span class="budget-name">☕ Kafe</span><span class="budget-nums budget-warn">140,000 / <span style="color:var(--danger)">100,000 ⚠️</span></span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:100%;background:var(--danger)"></div></div>
+            </div>
+            <div class="budget-item">
+              <div class="budget-top"><span class="budget-name">📱 Texnologiya</span><span class="budget-nums">110,000 / <span style="color:var(--accent2)">200,000</span></span></div>
+              <div class="budget-bar"><div class="budget-fill" style="width:55%;background:linear-gradient(90deg,#2E7CF6,#00D9A0)"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GOALS -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">🎯</span>
+            <span class="c-ttl">Tejash maqsadlari</span>
+            <span class="c-act" onclick="addGoal()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd">
+            <div class="goal-item">
+              <div class="goal-top"><span class="goal-ico">🏠</span><span class="goal-name">Uy uchun</span><span class="goal-pct" style="color:var(--accent2)">32%</span></div>
+              <div class="goal-bar"><div class="goal-fill" style="width:32%;background:linear-gradient(90deg,#2E7CF6,#00D9A0)"></div></div>
+              <div class="goal-meta"><span>1,600,000 / 5,000,000 so'm</span><span>~18 oy qoldi</span></div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-top"><span class="goal-ico">💻</span><span class="goal-name">MacBook Pro</span><span class="goal-pct" style="color:var(--warn)">58%</span></div>
+              <div class="goal-bar"><div class="goal-fill" style="width:58%;background:linear-gradient(90deg,#F6A32E,#2E7CF6)"></div></div>
+              <div class="goal-meta"><span>8,700,000 / 15,000,000 so'm</span><span>~4 oy qoldi</span></div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-top"><span class="goal-ico">✈️</span><span class="goal-name">Sayohat</span><span class="goal-pct" style="color:var(--purple)">75%</span></div>
+              <div class="goal-bar"><div class="goal-fill" style="width:75%;background:linear-gradient(90deg,#A064FF,#2E7CF6)"></div></div>
+              <div class="goal-meta"><span>1,500,000 / 2,000,000 so'm</span><span>~2 oy qoldi</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab" onclick="openModal()" title="Tranzaksiya qo'shish">+</div>
+
+<!-- ADD TRANSACTION MODAL -->
+<div class="modal-overlay" id="txnModal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3>Yangi tranzaksiya</h3>
+    <div class="m-row">
+      <div class="m-label">Tur</div>
+      <div class="type-btns">
+        <button class="type-btn out active" id="typeOut" onclick="setType('out')">➖ Xarajat</button>
+        <button class="type-btn inc" id="typeIn" onclick="setType('in')">➕ Daromad</button>
+      </div>
+    </div>
+    <div class="m-row">
+      <div class="m-label">Nomi</div>
+      <input class="m-inp" type="text" id="txnName" placeholder="Tranzaksiya nomi...">
+    </div>
+    <div class="m-row">
+      <div class="m-label">Miqdor (so'm)</div>
+      <input class="m-inp" type="number" id="txnAmount" placeholder="0">
+    </div>
+    <div class="m-row">
+      <div class="m-label">Kategoriya</div>
+      <select class="m-select" id="txnCat">
+        <option value="oziq">🛒 Oziq-ovqat</option>
+        <option value="kafe">☕ Kafe & ovqat</option>
+        <option value="transport">🚗 Transport</option>
+        <option value="uy">🏠 Uy</option>
+        <option value="texno">📱 Texnologiya</option>
+        <option value="ish">💼 Ish</option>
+        <option value="freelance">💻 Freelance</option>
+        <option value="boshqa">🏷️ Boshqa</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal()">Bekor</button>
+      <button class="m-ok" onclick="addTxn()">Qo'shish</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATA
+const CAT_MAP = {
+  oziq:{icon:'🛒',label:'Oziq-ovqat',bg:'rgba(246,92,46,0.12)',color:'#F65C2E'},
+  kafe:{icon:'☕',label:'Kafe',bg:'rgba(246,163,46,0.12)',color:'#F6A32E'},
+  transport:{icon:'🚗',label:'Transport',bg:'rgba(160,100,255,0.12)',color:'#C48AFF'},
+  uy:{icon:'🏠',label:'Uy',bg:'rgba(46,124,246,0.12)',color:'#7AB3FF'},
+  texno:{icon:'📱',label:'Texnologiya',bg:'rgba(0,217,160,0.10)',color:'#00D9A0'},
+  ish:{icon:'💼',label:'Ish',bg:'rgba(0,217,160,0.10)',color:'#00D9A0'},
+  freelance:{icon:'💻',label:'Freelance',bg:'rgba(46,124,246,0.12)',color:'#7AB3FF'},
+  boshqa:{icon:'🏷️',label:'Boshqa',bg:'rgba(139,163,194,0.12)',color:'#8BA3C2'},
+};
+
+let txns = [
+  {id:1,type:'out',name:'Oziq-ovqat',cat:'oziq',amount:85000,date:'Bugun'},
+  {id:2,type:'in', name:'Freelance to\'lov',cat:'freelance',amount:1200000,date:'Kecha'},
+  {id:3,type:'out',name:'Kafe',cat:'kafe',amount:35000,date:'18 may'},
+  {id:4,type:'out',name:'Internet to\'lov',cat:'texno',amount:60000,date:'17 may'},
+  {id:5,type:'in', name:'Ish maoshi',cat:'ish',amount:2500000,date:'15 may'},
+  {id:6,type:'out',name:'Metro & avtobus',cat:'transport',amount:45000,date:'15 may'},
+  {id:7,type:'out',name:'Kafe tushlik',cat:'kafe',amount:55000,date:'14 may'},
+  {id:8,type:'out',name:'Do\'kon',cat:'oziq',amount:120000,date:'13 may'},
+  {id:9,type:'in', name:'Freelance loyiha',cat:'freelance',amount:700000,date:'10 may'},
+  {id:10,type:'out',name:'Kommunal to\'lov',cat:'uy',amount:150000,date:'5 may'},
+];
+let nextId=11;
+let currentFilter='all';
+let currentType='out';
+
+function fmt(n){ return n.toLocaleString('uz'); }
+
+function renderTxns(){
+  const list=document.getElementById('txnList');
+  const filtered=currentFilter==='all'?txns:txns.filter(t=>t.type===currentFilter);
+  list.innerHTML='';
+  filtered.forEach(t=>{
+    const cm=CAT_MAP[t.cat]||CAT_MAP.boshqa;
+    const div=document.createElement('div');
+    div.className='txn-item';
+    div.innerHTML=`
+      <div class="txn-ico" style="background:${cm.bg}">${cm.icon}</div>
+      <div class="txn-body">
+        <div class="txn-name">${t.name}</div>
+        <div class="txn-meta">
+          <span class="txn-cat" style="background:${cm.bg};color:${cm.color}">${cm.label}</span>
+          <span class="txn-date">${t.date}</span>
+        </div>
+      </div>
+      <div class="txn-amount ${t.type==='out'?'txn-out':'txn-in'}">${t.type==='out'?'-':'+'}${fmt(t.amount)}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function filterTxn(btn,f){
+  document.querySelectorAll('.txn-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=f;
+  renderTxns();
+}
+
+function setPeriod(btn){
+  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// CHART
+const chartData=[
+  {month:'Dek',inc:2100000,out:1800000},
+  {month:'Yan',inc:2300000,out:1950000},
+  {month:'Feb',inc:2500000,out:2100000},
+  {month:'Mar',inc:2200000,out:1750000},
+  {month:'Apr',inc:2800000,out:2200000},
+  {month:'May',inc:3200000,out:2350000},
+];
+function renderChart(){
+  const wrap=document.getElementById('chartBars');
+  wrap.innerHTML='';
+  const maxVal=Math.max(...chartData.map(d=>Math.max(d.inc,d.out)));
+  chartData.forEach(d=>{
+    const inH=Math.round(d.inc/maxVal*100);
+    const outH=Math.round(d.out/maxVal*100);
+    const div=document.createElement('div');
+    div.className='chart-bar-wrap';
+    div.innerHTML=`
+      <div class="chart-bar-inner">
+        <div class="bar-in" style="height:${inH}%"></div>
+        <div class="bar-out" style="height:${outH}%"></div>
+      </div>
+      <div class="bar-label">${d.month}</div>`;
+    wrap.appendChild(div);
+  });
+}
+
+// MODAL
+function openModal(){
+  document.getElementById('txnModal').style.display='flex';
+  setTimeout(()=>document.getElementById('txnName').focus(),100);
+}
+function closeModal(){ document.getElementById('txnModal').style.display='none'; }
+function setType(t){
+  currentType=t;
+  document.getElementById('typeOut').classList.toggle('active',t==='out');
+  document.getElementById('typeIn').classList.toggle('active',t==='in');
+}
+function addTxn(){
+  const name=document.getElementById('txnName').value.trim();
+  const amount=parseInt(document.getElementById('txnAmount').value)||0;
+  const cat=document.getElementById('txnCat').value;
+  if(!name||!amount) return;
+  const d=new Date();
+  txns.unshift({id:nextId++,type:currentType,name,cat,amount,date:'Bugun, '+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')});
+  closeModal();
+  renderTxns();
+  document.getElementById('txnName').value='';
+  document.getElementById('txnAmount').value='';
+}
+document.getElementById('txnName')?.addEventListener('keydown',e=>{if(e.key==='Enter')addTxn();});
+
+function editBudget(){ alert('Byudjet tahrirlash — tez orada!'); }
+function addGoal(){ alert('Yangi tejash maqsadi — tez orada!'); }
+function exportData(){
+  let csv='Tur,Nomi,Kategoriya,Miqdor,Sana\n';
+  txns.forEach(t=>{ csv+=`${t.type==='out'?'Xarajat':'Daromad'},${t.name},${CAT_MAP[t.cat]?.label||t.cat},${t.amount},${t.date}\n`; });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='brainos-finance.csv';a.click();
+}
+function aiAnalyze(){
+  window.location.href='chat.html?q='+encodeURIComponent('Moliyaviy holatimni tahlil qil: Bu oy daromad 3,200,000 so\'m, xarajat 2,350,000 so\'m. Qanday tejash mumkin?');
+}
+
+renderTxns();
+renderChart();
+</script>
+</body>
+</html>

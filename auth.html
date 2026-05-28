@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — Kirish</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050A14;--bg2:#07101F;--surface:#0D1B33;--card:#0A172B;
+  --border:#162840;--border2:#1E3555;--accent:#2E7CF6;--accent2:#00D9A0;
+  --warn:#F6A32E;--danger:#F65C2E;--text:#EFF4FF;--muted:#7A9BBF;--muted2:#3D5A7A;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;}
+
+/* AMBIENT */
+.g1,.g2,.g3{position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+.g1{width:700px;height:700px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(46,124,246,0.11) 0%,transparent 65%);}
+.g2{width:600px;height:600px;bottom:-200px;right:-200px;background:radial-gradient(circle,rgba(0,217,160,0.08) 0%,transparent 65%);}
+.g3{width:400px;height:400px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(46,124,246,0.05) 0%,transparent 65%);}
+
+/* LAYOUT */
+.page{position:relative;z-index:1;display:flex;width:100%;height:100%;}
+
+/* LEFT PANEL */
+.left-panel{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px;display:none;}
+@media(min-width:1024px){.left-panel{display:flex;}}
+.lp-logo{display:flex;align-items:center;gap:12px;margin-bottom:60px;}
+.lp-mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;}
+.lp-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.lp-title{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:20px;}
+.lp-title span{background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.lp-sub{font-size:16px;color:var(--muted);line-height:1.7;max-width:400px;margin-bottom:48px;}
+.features{display:flex;flex-direction:column;gap:14px;}
+.feat{display:flex;align-items:center;gap:12px;}
+.feat-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.feat-text{font-size:14px;color:var(--muted);line-height:1.4;}
+.feat-text strong{color:var(--text);}
+
+/* RIGHT PANEL - AUTH */
+.right-panel{width:100%;max-width:480px;display:flex;align-items:center;justify-content:center;padding:24px;flex-shrink:0;}
+@media(min-width:1024px){.right-panel{border-left:1px solid var(--border);background:rgba(7,16,31,0.8);backdrop-filter:blur(20px);}}
+
+.auth-box{width:100%;max-width:400px;}
+
+/* MOBILE LOGO */
+.mobile-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center;}
+@media(min-width:1024px){.mobile-logo{display:none;}}
+.ml-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;}
+.ml-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+/* TABS */
+.auth-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:28px;}
+.auth-tab{flex:1;padding:10px;border-radius:8px;text-align:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);transition:all 0.2s;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
+.auth-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(46,124,246,0.3);}
+
+/* USER TYPE */
+.user-type{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.ut-btn{padding:12px;border-radius:10px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'DM Sans',sans-serif;}
+.ut-btn:hover{border-color:var(--border2);}
+.ut-btn.active{border-color:var(--accent);background:rgba(46,124,246,0.08);}
+.ut-icon{font-size:22px;margin-bottom:5px;display:block;}
+.ut-label{font-size:13px;font-weight:600;color:var(--text);display:block;}
+.ut-sub{font-size:11px;color:var(--muted);display:block;margin-top:2px;}
+
+/* FORM */
+.form-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;}
+.form-sub{font-size:13.5px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+
+.field{margin-bottom:16px;}
+.field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:block;}
+.field-wrap{position:relative;}
+.field-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;}
+.field-input:focus{border-color:var(--accent);background:rgba(13,27,51,0.8);}
+.field-input.error{border-color:var(--danger);}
+.field-input::placeholder{color:var(--muted2);}
+.field-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:15px;cursor:pointer;}
+.field-error{font-size:11.5px;color:var(--danger);margin-top:5px;display:none;}
+.field-error.show{display:block;}
+
+.forgot{font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:500;float:right;margin-top:-10px;margin-bottom:20px;transition:opacity 0.17s;}
+.forgot:hover{opacity:0.7;}
+
+/* BUTTONS */
+.btn-main{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;position:relative;overflow:hidden;margin-bottom:16px;}
+.btn-main::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent);opacity:0;transition:opacity 0.2s;}
+.btn-main:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,124,246,0.4);}
+.btn-main:hover::after{opacity:1;}
+.btn-main:active{transform:translateY(0);}
+.btn-main:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted2);font-size:12px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.btn-google{width:100%;padding:11px;border-radius:10px;background:transparent;border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-google:hover{border-color:var(--border2);background:rgba(255,255,255,0.03);}
+
+.g-icon{width:18px;height:18px;flex-shrink:0;}
+
+/* PASSWORD STRENGTH */
+.pwd-strength{margin-top:6px;display:none;}
+.pwd-strength.show{display:block;}
+.pwd-bars{display:flex;gap:3px;margin-bottom:3px;}
+.pwd-bar{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background 0.2s;}
+.pwd-bar.weak{background:var(--danger);}
+.pwd-bar.mid{background:var(--warn);}
+.pwd-bar.strong{background:var(--accent2);}
+.pwd-label{font-size:11px;color:var(--muted2);}
+
+/* TERMS */
+.terms{font-size:12px;color:var(--muted2);text-align:center;margin-top:16px;line-height:1.6;}
+.terms a{color:var(--accent);text-decoration:none;}
+
+/* LOADING SPINNER */
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUCCESS STATE */
+.success-state{text-align:center;padding:20px 0;animation:fup 0.4s ease both;display:none;}
+.success-icon{font-size:56px;margin-bottom:16px;}
+.success-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--muted);line-height:1.6;}
+
+/* TOAST */
+.toast{position:fixed;top:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-size:13px;z-index:200;animation:fup 0.3s ease both;box-shadow:0 8px 24px rgba(0,0,0,0.4);max-width:300px;}
+.toast.success{border-color:rgba(0,217,160,0.3);}
+.toast.error{border-color:rgba(246,92,46,0.3);}
+
+@keyframes fup{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div><div class="g3"></div>
+
+<div class="page">
+
+  <!-- LEFT INFO PANEL -->
+  <div class="left-panel">
+    <div class="lp-logo">
+      <div class="lp-mark">B</div>
+      <span class="lp-name">BrainOS</span>
+    </div>
+    <div class="lp-title">Aqlingizni<br><span>kuchaytiring</span></div>
+    <p class="lp-sub">BrainOS — kundalik hayot, o'qish, rejalashtirish va shaxsiy rivojlanish uchun aqlli AI ekotizimi.</p>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-ico" style="background:rgba(46,124,246,0.12)">💬</div>
+        <div class="feat-text"><strong>AI Chat</strong> — har qanday savolga tezkor javob</div>
+      </div>
+      <div class="feat">
+        <div class="feat-ico" style="background:rgba(0,217,160,0.10)">📝</div>
+        <div class="feat-text"><strong>Aqlli qaydlar</strong> — AI bilan boyitilgan eslatmalar</div>
+      </div>
+      <div class="feat">
+        <div class="feat-ico" style="background:rgba(246,163,46,0.10)">📅</div>
+        <div class="feat-text"><strong>Rejalashtirish</strong> — kunlik maqsad va vazifalar</div>
+      </div>
+      <div class="feat">
+        <div class="feat-ico" style="background:rgba(160,100,255,0.10)">💰</div>
+        <div class="feat-text"><strong>Moliya</strong> — xarajat va daromadlarni kuzatish</div>
+      </div>
+      <div class="feat">
+        <div class="feat-ico" style="background:rgba(246,92,46,0.10)">📚</div>
+        <div class="feat-text"><strong>O'qish rejasi</strong> — bilim rivojlanishini nazorat</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT AUTH PANEL -->
+  <div class="right-panel">
+    <div class="auth-box">
+
+      <!-- MOBILE LOGO -->
+      <div class="mobile-logo">
+        <div class="ml-mark">B</div>
+        <span class="ml-name">BrainOS</span>
+      </div>
+
+      <!-- TABS -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login',this)">Kirish</button>
+        <button class="auth-tab" onclick="switchTab('register',this)">Ro'yxatdan o'tish</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm">
+        <div class="form-title">Xush kelibsiz 👋</div>
+        <p class="form-sub">Akkauntingizga kiring va davom eting</p>
+
+        <div class="field">
+          <label class="field-label">Email manzil</label>
+          <div class="field-wrap">
+            <input class="field-input" id="loginEmail" type="email" placeholder="siz@example.com" oninput="clearError('loginEmail')">
+            <span class="field-icon">📧</span>
+          </div>
+          <div class="field-error" id="loginEmailErr">To'g'ri email kiriting</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Parol</label>
+          <div class="field-wrap">
+            <input class="field-input" id="loginPwd" type="password" placeholder="••••••••" oninput="clearError('loginPwd')" onkeydown="if(event.key==='Enter')doLogin()">
+            <span class="field-icon" onclick="togglePwd('loginPwd',this)">👁️</span>
+          </div>
+          <div class="field-error" id="loginPwdErr">Parol kamida 6 ta belgi</div>
+        </div>
+
+        <div class="forgot" onclick="forgotPassword()">Parolni unutdingizmi?</div>
+
+        <button class="btn-main" id="loginBtn" onclick="doLogin()">Kirish →</button>
+
+        <div class="divider">yoki</div>
+
+        <button class="btn-google" onclick="googleAuth()">
+          <svg class="g-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google bilan kirish
+        </button>
+
+        <div class="terms">
+          Akkauntingiz yo'qmi?
+          <a href="#" onclick="switchTab('register',document.querySelectorAll('.auth-tab')[1])">Ro'yxatdan o'ting</a>
+        </div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="registerForm" style="display:none">
+        <div class="form-title">Hisob yarating 🚀</div>
+        <p class="form-sub">BrainOS ga qo'shiling va maqsadlaringizga erishing</p>
+
+        <!-- USER TYPE -->
+        <div class="user-type">
+          <div class="ut-btn active" id="utPersonal" onclick="setUserType('personal')">
+            <span class="ut-icon">👤</span>
+            <span class="ut-label">Jismoniy</span>
+            <span class="ut-sub">Shaxsiy foydalanish</span>
+          </div>
+          <div class="ut-btn" id="utBusiness" onclick="setUserType('business')">
+            <span class="ut-icon">🏢</span>
+            <span class="ut-label">Yuridik</span>
+            <span class="ut-sub">Biznes va jamoa</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">To'liq ism</label>
+          <div class="field-wrap">
+            <input class="field-input" id="regName" type="text" placeholder="Azizbek Karimov" oninput="clearError('regName')">
+            <span class="field-icon">👤</span>
+          </div>
+          <div class="field-error" id="regNameErr">Ism kamida 2 ta harf</div>
+        </div>
+
+        <!-- Business only -->
+        <div id="companyField" class="field" style="display:none">
+          <label class="field-label">Kompaniya nomi</label>
+          <div class="field-wrap">
+            <input class="field-input" id="regCompany" type="text" placeholder="BrainOS LLC">
+            <span class="field-icon">🏢</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Email manzil</label>
+          <div class="field-wrap">
+            <input class="field-input" id="regEmail" type="email" placeholder="siz@example.com" oninput="clearError('regEmail')">
+            <span class="field-icon">📧</span>
+          </div>
+          <div class="field-error" id="regEmailErr">To'g'ri email kiriting</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Parol</label>
+          <div class="field-wrap">
+            <input class="field-input" id="regPwd" type="password" placeholder="Kamida 8 ta belgi" oninput="checkStrength();clearError('regPwd')">
+            <span class="field-icon" onclick="togglePwd('regPwd',this)">👁️</span>
+          </div>
+          <div class="field-error" id="regPwdErr">Parol kamida 8 ta belgi bo'lishi kerak</div>
+          <div class="pwd-strength" id="pwdStrength">
+            <div class="pwd-bars">
+              <div class="pwd-bar" id="bar1"></div>
+              <div class="pwd-bar" id="bar2"></div>
+              <div class="pwd-bar" id="bar3"></div>
+              <div class="pwd-bar" id="bar4"></div>
+            </div>
+            <div class="pwd-label" id="pwdLabel">Parol kuchi</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Parolni tasdiqlang</label>
+          <div class="field-wrap">
+            <input class="field-input" id="regPwd2" type="password" placeholder="••••••••" oninput="clearError('regPwd2')" onkeydown="if(event.key==='Enter')doRegister()">
+            <span class="field-icon" onclick="togglePwd('regPwd2',this)">👁️</span>
+          </div>
+          <div class="field-error" id="regPwd2Err">Parollar mos kelmadi</div>
+        </div>
+
+        <button class="btn-main" id="regBtn" onclick="doRegister()">Ro'yxatdan o'tish →</button>
+
+        <div class="divider">yoki</div>
+
+        <button class="btn-google" onclick="googleAuth()">
+          <svg class="g-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Google bilan ro'yxatdan o'tish
+        </button>
+
+        <div class="terms">
+          Ro'yxatdan o'tish orqali <a href="#">Foydalanish shartlari</a> va <a href="#">Maxfiylik siyosati</a>ga roziman.<br><br>
+          Akkauntingiz bormi? <a href="#" onclick="switchTab('login',document.querySelectorAll('.auth-tab')[0])">Kiring</a>
+        </div>
+      </div>
+
+      <!-- SUCCESS STATE -->
+      <div class="success-state" id="successState">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Muvaffaqiyatli!</div>
+        <p class="success-sub" id="successMsg">Dashboard ga o'tilmoqda...</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let userType = 'personal';
+let currentTab = 'login';
+
+// TAB SWITCH
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('successState').style.display = 'none';
+}
+
+// USER TYPE
+function setUserType(type) {
+  userType = type;
+  document.getElementById('utPersonal').classList.toggle('active', type === 'personal');
+  document.getElementById('utBusiness').classList.toggle('active', type === 'business');
+  document.getElementById('companyField').style.display = type === 'business' ? 'block' : 'none';
+}
+
+// TOGGLE PASSWORD
+function togglePwd(id, icon) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  icon.textContent = inp.type === 'password' ? '👁️' : '🙈';
+}
+
+// ERROR HANDLING
+function showError(id, msg) {
+  const inp = document.getElementById(id);
+  const err = document.getElementById(id + 'Err');
+  if (inp) inp.classList.add('error');
+  if (err) { if(msg) err.textContent = msg; err.classList.add('show'); }
+}
+function clearError(id) {
+  const inp = document.getElementById(id);
+  const err = document.getElementById(id + 'Err');
+  if (inp) inp.classList.remove('error');
+  if (err) err.classList.remove('show');
+}
+
+// PASSWORD STRENGTH
+function checkStrength() {
+  const pwd = document.getElementById('regPwd').value;
+  const wrap = document.getElementById('pwdStrength');
+  const label = document.getElementById('pwdLabel');
+  const bars = [document.getElementById('bar1'),document.getElementById('bar2'),document.getElementById('bar3'),document.getElementById('bar4')];
+
+  if (!pwd) { wrap.classList.remove('show'); return; }
+  wrap.classList.add('show');
+
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  bars.forEach((b, i) => {
+    b.className = 'pwd-bar';
+    if (i < score) b.classList.add(score <= 1 ? 'weak' : score <= 2 ? 'mid' : 'strong');
+  });
+  label.textContent = score <= 1 ? '🔴 Zaif parol' : score <= 2 ? '🟡 O\'rtacha' : score <= 3 ? '🟢 Yaxshi' : '💪 Juda kuchli';
+  label.style.color = score <= 1 ? 'var(--danger)' : score <= 2 ? 'var(--warn)' : 'var(--accent2)';
+}
+
+// VALIDATION
+function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+// LOGIN
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('loginPwd').value;
+  let valid = true;
+
+  if (!validateEmail(email)) { showError('loginEmail', 'To\'g\'ri email kiriting'); valid = false; }
+  if (pwd.length < 6)        { showError('loginPwd',   'Parol kamida 6 ta belgi'); valid = false; }
+  if (!valid) return;
+
+  setLoading('loginBtn', true);
+
+  try {
+    const res = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showSuccess('Muvaffaqiyatli kirildi! Dashboard ga o\'tilmoqda...', data.userType);
+    } else {
+      showToast('❌', data.message || 'Email yoki parol noto\'g\'ri', 'error');
+    }
+  } catch {
+    // Demo mode - backend yo'q bo'lsa
+    showSuccess('Demo: Muvaffaqiyatli kirildi!', 'personal');
+  }
+  setLoading('loginBtn', false);
+}
+
+// REGISTER
+async function doRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pwd   = document.getElementById('regPwd').value;
+  const pwd2  = document.getElementById('regPwd2').value;
+  let valid = true;
+
+  if (name.length < 2)        { showError('regName',  'Ism kamida 2 ta harf'); valid = false; }
+  if (!validateEmail(email))  { showError('regEmail', 'To\'g\'ri email kiriting'); valid = false; }
+  if (pwd.length < 8)         { showError('regPwd',   'Parol kamida 8 ta belgi bo\'lishi kerak'); valid = false; }
+  if (pwd !== pwd2)           { showError('regPwd2',  'Parollar mos kelmadi'); valid = false; }
+  if (!valid) return;
+
+  setLoading('regBtn', true);
+
+  try {
+    const res = await fetch('/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password: pwd, userType, company: document.getElementById('regCompany')?.value })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showSuccess('Hisob yaratildi! Dashboard ga o\'tilmoqda...', userType);
+    } else {
+      showToast('❌', data.message || 'Ro\'yxatdan o\'tishda xatolik', 'error');
+    }
+  } catch {
+    // Demo mode
+    showSuccess('Demo: Hisob yaratildi!', userType);
+  }
+  setLoading('regBtn', false);
+}
+
+// GOOGLE AUTH
+function googleAuth() {
+  showToast('🔄', 'Google orqali kirilmoqda...', 'success');
+  setTimeout(() => showSuccess('Google orqali kirildi!', 'personal'), 1500);
+}
+
+// FORGOT PASSWORD
+function forgotPassword() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!validateEmail(email)) {
+    showError('loginEmail', 'Avval email kiriting');
+    document.getElementById('loginEmail').focus();
+    return;
+  }
+  showToast('📧', email + ' ga tiklash havolasi yuborildi', 'success');
+}
+
+// SUCCESS
+function showSuccess(msg, type) {
+  document.getElementById('loginForm').style.display    = 'none';
+  document.getElementById('registerForm').style.display = 'none';
+  const ss = document.getElementById('successState');
+  ss.style.display = 'block';
+  document.getElementById('successMsg').textContent = msg;
+  setTimeout(() => {
+    window.location.href = type === 'business' ? 'business-dashboard.html' : 'dashboard.html';
+  }, 1800);
+}
+
+// LOADING
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span>';
+  } else {
+    btn.innerHTML = btn.dataset.orig || btn.innerHTML;
+  }
+}
+
+// TOAST
+function showToast(icon, msg, type = 'success') {
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  document.body.appendChild(div);
+  setTimeout(() => { div.style.animation = 'fadeOut 0.3s ease both'; setTimeout(() => div.remove(), 300); }, 3000);
+}
+
+// URL params
+const params = new URLSearchParams(window.location.search);
+if (params.get('tab') === 'register') {
+  switchTab('register', document.querySelectorAll('.auth-tab')[1]);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — O'qish</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050A14;--bg2:#07101F;--surface:#0D1B33;--card:#0A172B;
+  --border:#162840;--border2:#1E3555;--accent:#2E7CF6;--accent2:#00D9A0;
+  --warn:#F6A32E;--danger:#F65C2E;--purple:#A064FF;
+  --text:#EFF4FF;--muted:#7A9BBF;--muted2:#3D5A7A;--sw:230px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.g1,.g2{position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+.g1{width:600px;height:600px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%);}
+.g2{width:450px;height:450px;bottom:-80px;right:-60px;background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%);}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;}
+.s-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.s-mark{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.s-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.s-nav{flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px;}
+.s-sec{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px;}
+.s-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13.5px;transition:all 0.17s;position:relative;user-select:none;text-decoration:none;}
+.s-item:hover{background:rgba(46,124,246,0.07);color:var(--text);}
+.s-item.active{background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500;}
+.s-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 3px 3px 0;background:var(--accent);}
+.s-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.s-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;}
+.sb-b{background:rgba(46,124,246,0.25);color:#7AB3FF;}.sb-w{background:rgba(246,163,46,0.2);color:var(--warn);}
+.s-user{padding:10px 8px;border-top:1px solid var(--border);}
+.u-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.17s;}
+.u-row:hover{background:rgba(255,255,255,0.04);}
+.u-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;}
+.u-nm{font-size:13px;font-weight:600;}.u-pl{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px;}
+.u-dt{width:5px;height:5px;border-radius:50%;background:var(--accent2);}.u-mo{margin-left:auto;color:var(--muted2);font-size:16px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+.topbar{height:56px;flex-shrink:0;padding:0 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);}
+.tb-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.tb-sp{flex:1;}
+.view-btns{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;}
+.view-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.view-btn.active{background:var(--accent);color:#fff;}
+.tb-btn{width:34px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--muted);transition:all 0.17s;flex-shrink:0;}
+.tb-btn:hover{border-color:var(--border2);color:var(--text);}
+.add-btn{padding:8px 16px;border-radius:9px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.17s;font-family:'DM Sans',sans-serif;}
+.add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,124,246,0.35);}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px 28px;display:flex;flex-direction:column;gap:20px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;animation:fup 0.4s ease both;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;transition:all 0.2s;position:relative;overflow:hidden;}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.sc-ico{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.sc-lbl{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+.sc-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.sc-sub{font-size:11.5px;font-weight:500;}
+
+/* MAIN GRID */
+.read-grid{display:grid;grid-template-columns:1fr 300px;gap:20px;animation:fup 0.4s 0.1s ease both;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.c-hd{padding:15px 18px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.c-ic{font-size:15px;}
+.c-ttl{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;}
+.c-sub{font-size:11.5px;color:var(--muted);}
+.c-act{margin-left:auto;font-size:12px;color:var(--accent);cursor:pointer;font-weight:500;transition:opacity 0.17s;}
+.c-act:hover{opacity:0.7;}
+.c-bd{padding:14px 18px;}
+
+/* BOOK FILTERS */
+.book-filters{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.bf{padding:4px 10px;border-radius:15px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.bf:hover{color:var(--text);}
+.bf.active{background:rgba(46,124,246,0.15);color:#7AB3FF;border-color:rgba(46,124,246,0.3);}
+
+/* BOOK CARD */
+.book-card{background:rgba(13,27,51,0.7);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;display:flex;gap:14px;}
+.book-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.book-card:last-child{margin-bottom:0;}
+.book-card.active-book{border-color:rgba(46,124,246,0.35);background:rgba(46,124,246,0.06);}
+.bc-cover{width:52px;height:72px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;}
+.bc-status{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;border:2px solid var(--bg2);font-size:8px;display:flex;align-items:center;justify-content:center;}
+.bc-body{flex:1;}
+.bc-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:2px;}
+.bc-author{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.bc-meta{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.bc-tag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600;}
+.bc-pages{font-size:11.5px;color:var(--muted2);}
+.bc-rating{font-size:12px;color:var(--warn);}
+.bc-progress-row{display:flex;align-items:center;gap:8px;}
+.bc-bar{flex:1;height:4px;background:var(--border);border-radius:3px;overflow:hidden;}
+.bc-fill{height:100%;border-radius:3px;transition:width 0.8s ease;}
+.bc-pct{font-size:11.5px;font-weight:600;color:var(--muted);width:32px;text-align:right;}
+.bc-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.bc-btn{padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.bc-btn:hover{color:var(--text);border-color:var(--border2);}
+.bc-btn.primary{background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;}
+.bc-btn.primary:hover{transform:translateY(-1px);}
+
+/* RIGHT PANEL */
+.right-col{display:flex;flex-direction:column;gap:16px;}
+
+/* READING NOW */
+.now-card{background:linear-gradient(135deg,rgba(46,124,246,0.12),rgba(0,217,160,0.06));border:1px solid rgba(46,124,246,0.22);border-radius:14px;padding:18px;position:relative;overflow:hidden;}
+.now-card::after{content:'';position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(46,124,246,0.10),transparent 65%);pointer-events:none;}
+.now-label{font-size:10px;font-weight:700;color:var(--accent2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.now-dot{width:5px;height:5px;border-radius:50%;background:var(--accent2);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.now-book{display:flex;gap:12px;align-items:center;margin-bottom:14px;}
+.now-cover{width:44px;height:60px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.now-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:3px;}
+.now-author{font-size:12px;color:var(--muted);}
+.now-page{font-size:11px;color:var(--accent2);margin-top:3px;}
+.now-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.now-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#2E7CF6,#00D9A0);transition:width 0.8s ease;}
+.now-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted2);margin-bottom:12px;}
+.now-update{width:100%;padding:8px;border-radius:8px;background:rgba(46,124,246,0.15);border:1px solid rgba(46,124,246,0.25);color:#7AB3FF;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.17s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.now-update:hover{background:rgba(46,124,246,0.22);}
+
+/* STREAK */
+.streak-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
+.streak-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.streak-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--warn);}
+.streak-info{}
+.streak-label{font-size:13px;font-weight:600;}
+.streak-sub{font-size:11px;color:var(--muted);}
+.streak-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.s-day{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;}
+.sd-done{background:var(--warn);color:#050A14;}
+.sd-miss{background:var(--border);color:var(--muted2);}
+.sd-today{background:rgba(246,163,46,0.22);color:var(--warn);border:1px solid rgba(246,163,46,0.4);}
+
+/* MONTHLY GOAL */
+.goal-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;}
+.goal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.goal-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.goal-edit{font-size:12px;color:var(--accent);cursor:pointer;font-weight:500;}
+.goal-ring-wrap{display:flex;justify-content:center;margin-bottom:12px;}
+.goal-ring{position:relative;width:100px;height:100px;}
+.goal-ring svg{transform:rotate(-90deg);}
+.goal-ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.goal-ring-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.goal-ring-lbl{font-size:10px;color:var(--muted);}
+.goal-stats{display:flex;justify-content:space-around;}
+.gs-item{text-align:center;}
+.gs-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:2px;}
+.gs-lbl{font-size:10.5px;color:var(--muted2);}
+
+/* NOTES PANEL */
+.note-item{padding:10px 12px;border-radius:9px;background:rgba(13,27,51,0.7);border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all 0.17s;}
+.note-item:hover{border-color:var(--border2);}
+.note-item:last-child{margin-bottom:0;}
+.ni-book{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:3px;}
+.ni-text{font-size:12.5px;line-height:1.4;margin-bottom:4px;}
+.ni-page{font-size:10.5px;color:var(--muted2);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:420px;max-width:90vw;animation:fup 0.2s ease both;}
+.modal h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;}
+.m-row{margin-bottom:12px;}
+.m-label{font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+.m-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;}
+.m-inp:focus{border-color:rgba(46,124,246,0.4);}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.m-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.m-cancel{padding:8px 16px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.m-ok{padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* UPDATE PAGE MODAL */
+.page-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:340px;max-width:90vw;animation:fup 0.2s ease both;}
+
+@keyframes fup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo"><div class="s-mark">B</div><span class="s-name">BrainOS</span></div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <a class="s-item" href="dashboard.html"><span class="s-ico">🏠</span>Dashboard</a>
+    <a class="s-item" href="chat.html"><span class="s-ico">💬</span>AI Chat<span class="s-badge sb-b">3</span></a>
+    <a class="s-item" href="notes.html"><span class="s-ico">📝</span>Qaydlar</a>
+    <a class="s-item" href="plan.html"><span class="s-ico">📅</span>Kunlik reja<span class="s-badge sb-w">2</span></a>
+    <a class="s-item" href="reminders.html"><span class="s-ico">⏰</span>Eslatmalar</a>
+    <div class="s-sec" style="margin-top:6px">Rivojlanish</div>
+    <a class="s-item" href="#"><span class="s-ico">🎯</span>Odatlar</a>
+    <div class="s-item active"><span class="s-ico">📚</span>O'qish</div>
+    <a class="s-item" href="finance.html"><span class="s-ico">💰</span>Moliya</a>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <a class="s-item" href="#"><span class="s-ico">📊</span>Statistika</a>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user"><div class="u-row"><div class="u-av">AK</div><div><div class="u-nm">Azizbek</div><div class="u-pl"><span class="u-dt"></span>Free plan</div></div><div class="u-mo">⋯</div></div></div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-ttl">O'qish Rejasi</span>
+    <div class="tb-sp"></div>
+    <div class="view-btns">
+      <button class="view-btn active" onclick="setView(this,'all')">Barchasi</button>
+      <button class="view-btn" onclick="setView(this,'reading')">O'qilmoqda</button>
+      <button class="view-btn" onclick="setView(this,'done')">Tugatilgan</button>
+    </div>
+    <div class="tb-btn" title="AI tavsiya" onclick="aiRecommend()">🤖</div>
+    <button class="add-btn" onclick="openAddModal()">+ Kitob qo'shish</button>
+  </div>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="sc-ico" style="background:rgba(246,163,46,0.12)">🔥</div>
+        <div class="sc-lbl">O'qish streaki</div>
+        <div class="sc-val" style="color:var(--warn)">27</div>
+        <div class="sc-sub" style="color:var(--warn)">kun ketma-ket</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-ico" style="background:rgba(0,217,160,0.10)">📚</div>
+        <div class="sc-lbl">Bu yil o'qildi</div>
+        <div class="sc-val" style="color:var(--accent2)">8</div>
+        <div class="sc-sub" style="color:var(--accent2)">kitob tamom</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-ico" style="background:rgba(46,124,246,0.10)">📄</div>
+        <div class="sc-lbl">Jami betlar</div>
+        <div class="sc-val" style="color:#7AB3FF">2,840</div>
+        <div class="sc-sub" style="color:var(--muted)">bu yil</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-ico" style="background:rgba(160,100,255,0.10)">⏱️</div>
+        <div class="sc-lbl">O'rtacha vaqt</div>
+        <div class="sc-val" style="color:var(--purple)">34</div>
+        <div class="sc-sub" style="color:var(--muted)">daqiqa/kun</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="read-grid">
+
+      <!-- LEFT: BOOKS -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- BOOK LIST -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">📚</span>
+            <span class="c-ttl">Kitoblarim</span>
+            <span class="c-sub" id="bookCountLbl">5 ta</span>
+            <span class="c-act" onclick="openAddModal()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd">
+            <div class="book-filters">
+              <button class="bf active" onclick="filterBooks(this,'all')">Hammasi</button>
+              <button class="bf" onclick="filterBooks(this,'reading')">📖 O'qilmoqda</button>
+              <button class="bf" onclick="filterBooks(this,'done')">✅ Tugatilgan</button>
+              <button class="bf" onclick="filterBooks(this,'queue')">⏳ Navbatda</button>
+            </div>
+            <div id="bookList"></div>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="card">
+          <div class="c-hd">
+            <span class="c-ic">💡</span>
+            <span class="c-ttl">Kitob qaydlari</span>
+            <span class="c-act" onclick="openNoteModal()">+ Qo'shish</span>
+          </div>
+          <div class="c-bd" id="bookNotes">
+            <div class="note-item">
+              <div class="ni-book">📘 Clean Code — bet 89</div>
+              <div class="ni-text">"Functions should do one thing. They should do it well. They should do it only."</div>
+              <div class="ni-page">Bob Martin · 3 kun oldin</div>
+            </div>
+            <div class="note-item">
+              <div class="ni-book">📗 Atomic Habits — bet 52</div>
+              <div class="ni-text">Odatlar 4 bosqichdan iborat: Signal → Istak → Javob → Mukofot. Har birini optimallash kerak.</div>
+              <div class="ni-page">James Clear · 5 kun oldin</div>
+            </div>
+            <div class="note-item">
+              <div class="ni-book">📘 Clean Code — bet 34</div>
+              <div class="ni-text">Naming matters. Variable names should reveal intent. Use pronounceable names.</div>
+              <div class="ni-page">Bob Martin · 1 hafta oldin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-col">
+
+        <!-- READING NOW -->
+        <div class="now-card" id="nowCard">
+          <div class="now-label"><span class="now-dot"></span>Hozir o'qilyapman</div>
+          <div class="now-book">
+            <div class="now-cover" style="background:rgba(46,124,246,0.15)">📘</div>
+            <div>
+              <div class="now-title" id="nowTitle">Clean Code</div>
+              <div class="now-author" id="nowAuthor">Robert C. Martin</div>
+              <div class="now-page" id="nowPage">215-bet o'qilyapman</div>
+            </div>
+          </div>
+          <div class="now-bar"><div class="now-fill" id="nowFill" style="width:72%"></div></div>
+          <div class="now-meta">
+            <span id="nowPct">72% (215/299 bet)</span>
+            <span id="nowLeft">~84 bet qoldi</span>
+          </div>
+          <button class="now-update" onclick="openUpdateModal()">📖 Sahifani yangilash</button>
+        </div>
+
+        <!-- STREAK -->
+        <div class="streak-card">
+          <div class="streak-top">
+            <div class="streak-num">🔥 27</div>
+            <div class="streak-info">
+              <div class="streak-label">kun streak</div>
+              <div class="streak-sub">Har kuni o'qib keling!</div>
+            </div>
+          </div>
+          <div class="streak-days" id="streakDays"></div>
+        </div>
+
+        <!-- MONTHLY GOAL -->
+        <div class="goal-card">
+          <div class="goal-top">
+            <span class="goal-title">Oylik maqsad</span>
+            <span class="goal-edit" onclick="editGoal()">Tahrirlash</span>
+          </div>
+          <div class="goal-ring-wrap">
+            <div class="goal-ring">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(22,40,64,1)" stroke-width="8"/>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="url(#grad)" stroke-width="8"
+                  stroke-dasharray="263.9" stroke-dashoffset="79.2" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#2E7CF6"/>
+                    <stop offset="100%" style="stop-color:#00D9A0"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="goal-ring-num">
+                <div class="goal-ring-val" style="color:var(--accent)">3</div>
+                <div class="goal-ring-lbl">/ 4 kitob</div>
+              </div>
+            </div>
+          </div>
+          <div class="goal-stats">
+            <div class="gs-item"><div class="gs-val" style="color:var(--accent2)">8</div><div class="gs-lbl">Bu yil</div></div>
+            <div class="gs-item"><div class="gs-val" style="color:var(--warn)">27</div><div class="gs-lbl">Streak</div></div>
+            <div class="gs-item"><div class="gs-val" style="color:var(--purple)">34 daq</div><div class="gs-lbl">Avg/kun</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BOOK MODAL -->
+<div class="modal-overlay" id="addModal" style="display:none" onclick="if(event.target===this)closeModal('addModal')">
+  <div class="modal">
+    <h3>Yangi kitob qo'shish</h3>
+    <div class="m-row"><div class="m-label">Kitob nomi</div><input class="m-inp" id="bkTitle" type="text" placeholder="Kitob nomi..."></div>
+    <div class="m-row"><div class="m-label">Muallif</div><input class="m-inp" id="bkAuthor" type="text" placeholder="Muallif ismi..."></div>
+    <div class="m-row m-grid">
+      <div><div class="m-label">Jami betlar</div><input class="m-inp" id="bkPages" type="number" placeholder="300"></div>
+      <div><div class="m-label">Holati</div>
+        <select class="m-select" id="bkStatus">
+          <option value="reading">📖 O'qilyapman</option>
+          <option value="queue">⏳ Navbatda</option>
+          <option value="done">✅ Tugatilgan</option>
+        </select>
+      </div>
+    </div>
+    <div class="m-row"><div class="m-label">Janr</div>
+      <select class="m-select" id="bkGenre">
+        <option value="texno">💻 Texnologiya</option>
+        <option value="shaxs">🧠 Shaxsiy rivojlanish</option>
+        <option value="biznes">💼 Biznes</option>
+        <option value="roman">📖 Roman</option>
+        <option value="ilm">🔬 Ilmiy</option>
+        <option value="boshqa">📚 Boshqa</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal('addModal')">Bekor</button>
+      <button class="m-ok" onclick="addBook()">Qo'shish</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE PAGE MODAL -->
+<div class="modal-overlay" id="updateModal" style="display:none" onclick="if(event.target===this)closeModal('updateModal')">
+  <div class="page-modal">
+    <h3>Sahifani yangilash</h3>
+    <div class="m-row">
+      <div class="m-label">Hozirgi bet (jami <span id="totalPagesLbl">299</span> bet)</div>
+      <input class="m-inp" id="currentPage" type="number" placeholder="215" min="1">
+    </div>
+    <div class="m-row">
+      <div class="m-label">Bugun o'qildi (daqiqa)</div>
+      <input class="m-inp" id="readMins" type="number" placeholder="30" min="1">
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal('updateModal')">Bekor</button>
+      <button class="m-ok" onclick="updatePage()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="noteModal" style="display:none" onclick="if(event.target===this)closeModal('noteModal')">
+  <div class="modal">
+    <h3>Kitob qaydlari</h3>
+    <div class="m-row">
+      <div class="m-label">Kitob</div>
+      <select class="m-select" id="noteBook"></select>
+    </div>
+    <div class="m-row">
+      <div class="m-label">Bet raqami</div>
+      <input class="m-inp" id="notePage" type="number" placeholder="89">
+    </div>
+    <div class="m-row">
+      <div class="m-label">Qayd / Iqtibos</div>
+      <textarea class="m-inp" id="noteText" rows="3" placeholder="Muhim fikr yoki iqtibos..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal('noteModal')">Bekor</button>
+      <button class="m-ok" onclick="addNote()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GENRE_MAP={
+  texno:{icon:'💻',label:'Texnologiya',color:'#7AB3FF',bg:'rgba(46,124,246,0.15)'},
+  shaxs:{icon:'🧠',label:'Shaxsiy rivojlanish',color:'#C48AFF',bg:'rgba(160,100,255,0.15)'},
+  biznes:{icon:'💼',label:'Biznes',color:'#F6A32E',bg:'rgba(246,163,46,0.15)'},
+  roman:{icon:'📖',label:'Roman',color:'#00D9A0',bg:'rgba(0,217,160,0.12)'},
+  ilm:{icon:'🔬',label:'Ilmiy',color:'#7AB3FF',bg:'rgba(46,124,246,0.12)'},
+  boshqa:{icon:'📚',label:'Boshqa',color:'#8BA3C2',bg:'rgba(139,163,194,0.12)'},
+};
+const STATUS_MAP={
+  reading:{icon:'📖',label:"O'qilyapman",color:'#7AB3FF'},
+  queue:{icon:'⏳',label:'Navbatda',color:'#F6A32E'},
+  done:{icon:'✅',label:'Tugatilgan',color:'#00D9A0'},
+};
+const COVERS=['📘','📗','📙','📕','📒','📔'];
+
+let books=[
+  {id:1,title:'Clean Code',author:'Robert C. Martin',pages:299,current:215,status:'reading',genre:'texno',rating:5,cover:'📘',added:'2 oy oldin'},
+  {id:2,title:'Atomic Habits',author:'James Clear',pages:256,current:116,status:'reading',genre:'shaxs',rating:5,cover:'📗',added:'1 oy oldin'},
+  {id:3,title:'Deep Work',author:'Cal Newport',pages:304,current:29,status:'reading',genre:'shaxs',rating:4,cover:'📙',added:'2 hafta oldin'},
+  {id:4,title:'The Pragmatic Programmer',author:'David Thomas',pages:352,current:352,status:'done',genre:'texno',rating:5,cover:'📕',added:'3 oy oldin'},
+  {id:5,title:'Zero to One',author:'Peter Thiel',pages:224,current:0,status:'queue',genre:'biznes',rating:0,cover:'📒',added:'1 hafta oldin'},
+];
+let nextId=6;
+let currentFilter='all';
+let activeBookId=1;
+
+function pct(b){return b.pages?Math.round(b.current/b.pages*100):0;}
+function stars(n){return '⭐'.repeat(n)+' '.repeat(5-n);}
+
+function renderBooks(){
+  const list=document.getElementById('bookList');
+  const filtered=currentFilter==='all'?books:books.filter(b=>b.status===currentFilter);
+  document.getElementById('bookCountLbl').textContent=filtered.length+' ta';
+  list.innerHTML='';
+  filtered.forEach(b=>{
+    const p=pct(b);
+    const gm=GENRE_MAP[b.genre]||GENRE_MAP.boshqa;
+    const sm=STATUS_MAP[b.status];
+    const div=document.createElement('div');
+    div.className='book-card'+(b.id===activeBookId?' active-book':'');
+    div.onclick=()=>setActiveBook(b.id);
+    div.innerHTML=`
+      <div class="bc-cover" style="background:${gm.bg}">
+        ${b.cover}
+        <div class="bc-status" style="background:${b.status==='done'?'var(--accent2)':b.status==='reading'?'var(--accent)':'var(--warn)'}">${sm.icon}</div>
+      </div>
+      <div class="bc-body">
+        <div class="bc-title">${b.title}</div>
+        <div class="bc-author">${b.author}</div>
+        <div class="bc-meta">
+          <span class="bc-tag" style="background:${gm.bg};color:${gm.color}">${gm.label}</span>
+          <span class="bc-pages">${b.pages} bet</span>
+          ${b.rating?'<span class="bc-rating">'+stars(b.rating)+'</span>':''}
+        </div>
+        ${b.status!=='queue'?`
+        <div class="bc-progress-row">
+          <div class="bc-bar"><div class="bc-fill" style="width:${p}%;background:linear-gradient(90deg,#2E7CF6,#00D9A0)"></div></div>
+          <span class="bc-pct">${p}%</span>
+        </div>`:'<div style="font-size:11px;color:var(--muted2);margin-top:4px">Hali boshlanmagan</div>'}
+      </div>
+      <div class="bc-actions">
+        ${b.status==='reading'?'<button class="bc-btn primary" onclick="event.stopPropagation();setActiveBook('+b.id+');openUpdateModal()">📖 Yangilash</button>':''}
+        ${b.status==='queue'?'<button class="bc-btn" onclick="event.stopPropagation();startBook('+b.id+')" style="color:var(--accent)">▶ Boshlash</button>':''}
+        ${b.status==='reading'?'<button class="bc-btn" onclick="event.stopPropagation();finishBook('+b.id+')" style="color:var(--accent2)">✅ Tamom</button>':''}
+        <button class="bc-btn" onclick="event.stopPropagation();deleteBook('+b.id+')" style="color:var(--danger)">🗑️</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function setActiveBook(id){
+  activeBookId=id;
+  const b=books.find(x=>x.id===id);
+  if(!b||b.status!=='reading') return;
+  const p=pct(b);
+  document.getElementById('nowTitle').textContent=b.title;
+  document.getElementById('nowAuthor').textContent=b.author;
+  document.getElementById('nowPage').textContent=b.current+'-bet o\'qilyapman';
+  document.getElementById('nowFill').style.width=p+'%';
+  document.getElementById('nowPct').textContent=p+'% ('+b.current+'/'+b.pages+' bet)';
+  document.getElementById('nowLeft').textContent='~'+(b.pages-b.current)+' bet qoldi';
+  renderBooks();
+}
+
+function filterBooks(btn,f){
+  document.querySelectorAll('.bf').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=f;
+  renderBooks();
+}
+function setView(btn){
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function startBook(id){
+  const b=books.find(x=>x.id===id);
+  if(b){b.status='reading';b.current=1;}
+  renderBooks();
+}
+function finishBook(id){
+  const b=books.find(x=>x.id===id);
+  if(b){b.status='done';b.current=b.pages;}
+  renderBooks();
+}
+function deleteBook(id){
+  if(!confirm('Kitobni o\'chirishni xohlaysizmi?')) return;
+  books=books.filter(x=>x.id!==id);
+  renderBooks();
+}
+
+// ADD BOOK
+function openAddModal(){
+  document.getElementById('addModal').style.display='flex';
+  setTimeout(()=>document.getElementById('bkTitle').focus(),100);
+}
+function addBook(){
+  const title=document.getElementById('bkTitle').value.trim();
+  const author=document.getElementById('bkAuthor').value.trim();
+  const pages=parseInt(document.getElementById('bkPages').value)||100;
+  const status=document.getElementById('bkStatus').value;
+  const genre=document.getElementById('bkGenre').value;
+  if(!title) return;
+  books.unshift({id:nextId++,title,author:author||'Noma\'lum',pages,current:0,status,genre,rating:0,cover:COVERS[Math.floor(Math.random()*COVERS.length)],added:'Hozir'});
+  closeModal('addModal');
+  renderBooks();
+  document.getElementById('bkTitle').value='';
+  document.getElementById('bkAuthor').value='';
+  document.getElementById('bkPages').value='';
+}
+document.getElementById('bkTitle')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('bkAuthor').focus();});
+
+// UPDATE PAGE
+function openUpdateModal(){
+  const b=books.find(x=>x.id===activeBookId);
+  if(!b||b.status!=='reading') return;
+  document.getElementById('totalPagesLbl').textContent=b.pages;
+  document.getElementById('currentPage').value=b.current;
+  document.getElementById('updateModal').style.display='flex';
+  setTimeout(()=>document.getElementById('currentPage').focus(),100);
+}
+function updatePage(){
+  const b=books.find(x=>x.id===activeBookId);
+  if(!b) return;
+  const pg=parseInt(document.getElementById('currentPage').value)||b.current;
+  b.current=Math.min(Math.max(pg,0),b.pages);
+  if(b.current>=b.pages) b.status='done';
+  closeModal('updateModal');
+  setActiveBook(activeBookId);
+}
+
+// NOTE
+function openNoteModal(){
+  const sel=document.getElementById('noteBook');
+  sel.innerHTML='';
+  books.filter(b=>b.status==='reading').forEach(b=>{
+    const opt=document.createElement('option');
+    opt.value=b.id;opt.textContent=b.title;
+    sel.appendChild(opt);
+  });
+  document.getElementById('noteModal').style.display='flex';
+}
+function addNote(){
+  const bookId=parseInt(document.getElementById('noteBook').value);
+  const page=document.getElementById('notePage').value;
+  const text=document.getElementById('noteText').value.trim();
+  if(!text) return;
+  const b=books.find(x=>x.id===bookId);
+  const notes=document.getElementById('bookNotes');
+  const div=document.createElement('div');
+  div.className='note-item';
+  div.innerHTML=`<div class="ni-book">${b?b.cover+' '+b.title:''} — bet ${page||'?'}</div>
+    <div class="ni-text">${text}</div><div class="ni-page">Hozir</div>`;
+  notes.insertBefore(div,notes.firstChild);
+  closeModal('noteModal');
+  document.getElementById('noteText').value='';
+  document.getElementById('notePage').value='';
+}
+
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+function editGoal(){ const g=prompt('Oylik maqsad (kitob soni):','4'); if(g) alert('Maqsad '+g+' ta kitobga o\'rnatildi!'); }
+function aiRecommend(){ window.location.href='chat.html?q='+encodeURIComponent('Menga o\'qish uchun kitob tavsiya ber. Men texnologiya va shaxsiy rivojlanish kitoblarini yaxshi ko\'raman. Hozir Clean Code o\'qiyapman.'); }
+
+// STREAK GRID
+function renderStreak(){
+  const grid=document.getElementById('streakDays');
+  const days=['D','S','C','P','J','Sh','Y'];
+  const pattern=[1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1];
+  grid.innerHTML='';
+  // day labels
+  days.forEach(d=>{const el=document.createElement('div');el.className='s-day';el.style.fontSize='8px';el.style.color='var(--muted2)';el.style.background='transparent';el.textContent=d;grid.appendChild(el);});
+  pattern.slice(0,21).forEach((done,i)=>{
+    const el=document.createElement('div');
+    el.className='s-day '+(i===20?'sd-today':done?'sd-done':'sd-miss');
+    grid.appendChild(el);
+  });
+}
+
+renderBooks();
+renderStreak();
+</script>
+</body>
+</html>

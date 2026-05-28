@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — Qaydlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#050A14; --bg2:#07101F; --surface:#0D1B33; --card:#0A172B;
+  --border:#162840; --border2:#1E3555; --accent:#2E7CF6; --accent2:#00D9A0;
+  --warn:#F6A32E; --danger:#F65C2E; --purple:#A064FF;
+  --text:#EFF4FF; --muted:#7A9BBF; --muted2:#3D5A7A; --sw:230px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.g1,.g2{position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+.g1{width:600px;height:600px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%);}
+.g2{width:450px;height:450px;bottom:-80px;right:-60px;background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%);}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;}
+.s-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.s-mark{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.s-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.s-nav{flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px;}
+.s-sec{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px;}
+.s-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13.5px;transition:all 0.17s;position:relative;user-select:none;text-decoration:none;}
+.s-item:hover{background:rgba(46,124,246,0.07);color:var(--text);}
+.s-item.active{background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500;}
+.s-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 3px 3px 0;background:var(--accent);}
+.s-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.s-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;}
+.sb-b{background:rgba(46,124,246,0.25);color:#7AB3FF;} .sb-w{background:rgba(246,163,46,0.2);color:var(--warn);}
+.s-user{padding:10px 8px;border-top:1px solid var(--border);}
+.u-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.17s;}
+.u-row:hover{background:rgba(255,255,255,0.04);}
+.u-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;}
+.u-nm{font-size:13px;font-weight:600;} .u-pl{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px;}
+.u-dt{width:5px;height:5px;border-radius:50%;background:var(--accent2);} .u-mo{margin-left:auto;color:var(--muted2);font-size:16px;}
+
+/* NOTES LIST PANEL */
+.notes-panel{width:280px;flex-shrink:0;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:9;}
+.np-top{padding:16px 14px 12px;border-bottom:1px solid var(--border);}
+.np-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.np-count{font-size:11px;color:var(--muted2);font-weight:400;}
+.np-new{width:100%;padding:9px;border-radius:9px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.17s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.np-new:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,124,246,0.35);}
+.np-search{margin-top:10px;display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:7px 11px;}
+.np-search:focus-within{border-color:rgba(46,124,246,0.4);}
+.np-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%;}
+.np-search input::placeholder{color:var(--muted2);}
+
+/* CATEGORIES */
+.np-cats{display:flex;gap:5px;padding:10px 14px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
+.cat-btn{padding:4px 10px;border-radius:15px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.cat-btn:hover{color:var(--text);border-color:var(--border2);}
+.cat-btn.active{background:rgba(46,124,246,0.15);color:#7AB3FF;border-color:rgba(46,124,246,0.3);}
+
+/* NOTES LIST */
+.np-list{flex:1;overflow-y:auto;padding:8px;}
+.note-item{padding:12px 12px;border-radius:10px;cursor:pointer;transition:all 0.17s;margin-bottom:4px;position:relative;border:1px solid transparent;}
+.note-item:hover{background:rgba(255,255,255,0.03);border-color:var(--border);}
+.note-item.active{background:rgba(46,124,246,0.08);border-color:rgba(46,124,246,0.25);}
+.ni-top{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.ni-pin{font-size:11px;color:var(--warn);}
+.ni-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.ni-preview{font-size:12px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px;}
+.ni-foot{display:flex;align-items:center;gap:6px;}
+.ni-date{font-size:10.5px;color:var(--muted2);}
+.ni-cat{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600;}
+.ni-del{margin-left:auto;opacity:0;font-size:11px;color:var(--muted2);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;cursor:pointer;transition:opacity 0.15s;}
+.note-item:hover .ni-del{opacity:1;}
+
+/* MAIN EDITOR */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+.topbar{height:56px;flex-shrink:0;padding:0 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);}
+.tb-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.tb-sp{flex:1;}
+.tb-btn{width:34px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--muted);transition:all 0.17s;flex-shrink:0;}
+.tb-btn:hover{border-color:var(--border2);color:var(--text);}
+.tb-tag{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.tb-tag:hover{color:var(--text);border-color:var(--border2);}
+
+/* EDITOR AREA */
+.editor-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* EMPTY STATE */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;animation:fup 0.4s ease both;}
+.es-icon{font-size:52px;margin-bottom:16px;}
+.es-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;}
+.es-sub{font-size:14px;color:var(--muted);max-width:320px;line-height:1.6;margin-bottom:24px;}
+.btn-create{padding:10px 22px;border-radius:10px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.17s;}
+.btn-create:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(46,124,246,0.38);}
+
+/* NOTE EDITOR */
+.note-editor{flex:1;display:flex;flex-direction:column;overflow:hidden;animation:fup 0.3s ease both;}
+.editor-meta{padding:20px 28px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.meta-cat{padding:5px 12px;border-radius:15px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.meta-date{font-size:12px;color:var(--muted2);}
+.meta-sep{color:var(--border2);}
+.meta-words{font-size:12px;color:var(--muted2);}
+.meta-pin{padding:4px 10px;border-radius:15px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.meta-pin:hover{color:var(--warn);border-color:rgba(246,163,46,0.3);}
+.meta-pin.pinned{color:var(--warn);border-color:rgba(246,163,46,0.3);background:rgba(246,163,46,0.08);}
+
+.editor-title{padding:16px 28px 8px;font-family:'Syne',sans-serif;font-size:26px;font-weight:800;border:none;outline:none;background:transparent;color:var(--text);width:100%;letter-spacing:-0.5px;}
+.editor-title::placeholder{color:var(--muted2);}
+
+/* TOOLBAR */
+.editor-toolbar{padding:0 24px 8px;display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tb-fmt{width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;font-weight:600;}
+.tb-fmt:hover{background:var(--surface);color:var(--text);}
+.tb-fmt.active{background:rgba(46,124,246,0.15);color:#7AB3FF;}
+.tb-sep{width:1px;height:18px;background:var(--border);margin:0 4px;}
+
+.editor-body{flex:1;overflow-y:auto;padding:16px 28px 24px;}
+.editor-content{min-height:100%;outline:none;font-size:15px;line-height:1.8;color:var(--text);caret-color:var(--accent);}
+.editor-content:empty::before{content:attr(data-placeholder);color:var(--muted2);pointer-events:none;}
+.editor-content h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin:12px 0 8px;}
+.editor-content h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin:10px 0 6px;}
+.editor-content h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin:8px 0 5px;}
+.editor-content strong{font-weight:700;}
+.editor-content em{font-style:italic;color:var(--accent2);}
+.editor-content code{background:rgba(46,124,246,0.12);border:1px solid rgba(46,124,246,0.2);border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace;color:#7AB3FF;}
+.editor-content blockquote{border-left:3px solid var(--accent);padding-left:14px;color:var(--muted);margin:8px 0;font-style:italic;}
+.editor-content ul,
+.editor-content ol{padding-left:20px;margin:6px 0;}
+.editor-content li{margin-bottom:3px;}
+.editor-content a{color:var(--accent);text-decoration:underline;}
+.editor-content hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
+
+/* EDITOR FOOTER */
+.editor-footer{padding:10px 28px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(5,10,20,0.5);}
+.ef-status{font-size:12px;color:var(--muted2);display:flex;align-items:center;gap:6px;}
+.ef-dot{width:5px;height:5px;border-radius:50%;background:var(--accent2);}
+.ef-sp{flex:1;}
+.ef-ai{padding:7px 14px;border-radius:8px;background:rgba(46,124,246,0.12);border:1px solid rgba(46,124,246,0.25);color:#7AB3FF;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.17s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;}
+.ef-ai:hover{background:rgba(46,124,246,0.18);transform:translateY(-1px);}
+.ef-save{padding:7px 16px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.17s;font-family:'DM Sans',sans-serif;}
+.ef-save:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,124,246,0.3);}
+
+/* AI PANEL */
+.ai-panel{width:280px;flex-shrink:0;height:100%;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;animation:slideIn 0.25s ease both;}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.ai-top{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.ai-top-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+.ai-close{width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);transition:all 0.15s;}
+.ai-close:hover{color:var(--text);border-color:var(--border2);}
+.ai-body{flex:1;overflow-y:auto;padding:12px;}
+.ai-msg{padding:10px 12px;border-radius:9px;margin-bottom:8px;font-size:13px;line-height:1.5;}
+.ai-msg.ai{background:var(--card);border:1px solid var(--border);color:var(--text);}
+.ai-msg.user{background:rgba(46,124,246,0.12);border:1px solid rgba(46,124,246,0.2);color:var(--text);}
+.ai-suggestions{padding:0 12px 12px;display:flex;flex-direction:column;gap:6px;}
+.ai-sug{padding:8px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.17s;}
+.ai-sug:hover{color:var(--text);border-color:rgba(46,124,246,0.3);background:rgba(46,124,246,0.06);}
+.ai-input-wrap{padding:10px 12px;border-top:1px solid var(--border);}
+.ai-inp-row{display:flex;gap:6px;}
+.ai-inp{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;}
+.ai-inp:focus{border-color:rgba(46,124,246,0.4);}
+.ai-inp::placeholder{color:var(--muted2);}
+.ai-send{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex-shrink:0;transition:all 0.17s;}
+.ai-send:hover{transform:scale(1.06);}
+
+@keyframes fup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;animation:fup 0.2s ease both;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:380px;max-width:90vw;}
+.modal h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;}
+.modal-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:10px;}
+.modal-inp:focus{border-color:rgba(46,124,246,0.4);}
+.modal-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.modal-cat{padding:5px 12px;border-radius:15px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.modal-cat:hover{color:var(--text);}
+.modal-cat.sel{border-color:rgba(46,124,246,0.4);color:#7AB3FF;background:rgba(46,124,246,0.12);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.modal-cancel{padding:8px 16px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.modal-ok{padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo"><div class="s-mark">B</div><span class="s-name">BrainOS</span></div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <a class="s-item" href="dashboard.html"><span class="s-ico">🏠</span>Dashboard</a>
+    <a class="s-item" href="chat.html"><span class="s-ico">💬</span>AI Chat<span class="s-badge sb-b">3</span></a>
+    <div class="s-item active"><span class="s-ico">📝</span>Qaydlar</div>
+    <a class="s-item" href="plan.html"><span class="s-ico">📅</span>Kunlik reja<span class="s-badge sb-w">2</span></a>
+    <a class="s-item" href="reminders.html"><span class="s-ico">⏰</span>Eslatmalar</a>
+    <div class="s-sec" style="margin-top:6px">Rivojlanish</div>
+    <a class="s-item" href="#"><span class="s-ico">🎯</span>Odatlar</a>
+    <a class="s-item" href="reading.html"><span class="s-ico">📚</span>O'qish</a>
+    <a class="s-item" href="finance.html"><span class="s-ico">💰</span>Moliya</a>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <a class="s-item" href="#"><span class="s-ico">📊</span>Statistika</a>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user"><div class="u-row"><div class="u-av">AK</div><div><div class="u-nm">Azizbek</div><div class="u-pl"><span class="u-dt"></span>Free plan</div></div><div class="u-mo">⋯</div></div></div>
+</aside>
+
+<!-- NOTES LIST PANEL -->
+<div class="notes-panel">
+  <div class="np-top">
+    <div class="np-title">Qaydlar <span class="np-count" id="noteCount">0 ta</span></div>
+    <button class="np-new" onclick="openNewModal()">✏️ Yangi qayd</button>
+    <div class="np-search" style="margin-top:10px">
+      <span style="color:var(--muted2);font-size:13px">🔍</span>
+      <input type="text" placeholder="Qidirish..." id="searchInp" oninput="filterNotes()">
+    </div>
+  </div>
+  <div class="np-cats">
+    <button class="cat-btn active" onclick="filterCat(this,'all')">Hammasi</button>
+    <button class="cat-btn" onclick="filterCat(this,'loyiha')" style="color:#7AB3FF">Loyiha</button>
+    <button class="cat-btn" onclick="filterCat(this,'shaxsiy')" style="color:#C48AFF">Shaxsiy</button>
+    <button class="cat-btn" onclick="filterCat(this,'oquv')" style="color:#00D9A0">O'quv</button>
+    <button class="cat-btn" onclick="filterCat(this,'goya')" style="color:#F6A32E">G'oya</button>
+  </div>
+  <div class="np-list" id="notesList"></div>
+</div>
+
+<!-- MAIN EDITOR -->
+<div class="main" id="mainArea">
+  <div class="topbar">
+    <span class="tb-ttl">Qaydlar</span>
+    <div class="tb-sp"></div>
+    <select class="tb-tag" id="catSelect" onchange="updateCat()" style="display:none">
+      <option value="loyiha">🔵 Loyiha</option>
+      <option value="shaxsiy">🟣 Shaxsiy</option>
+      <option value="oquv">🟢 O'quv</option>
+      <option value="goya">🟡 G'oya</option>
+      <option value="boshqa">⚪ Boshqa</option>
+    </select>
+    <div class="tb-btn" id="pinBtn" style="display:none" title="Pin" onclick="togglePin()">📌</div>
+    <div class="tb-btn" style="display:none" id="aiToggleBtn" title="AI yordam" onclick="toggleAI()">🤖</div>
+    <div class="tb-btn" style="display:none" id="deleteBtn" title="O'chirish" onclick="deleteNote()">🗑️</div>
+    <div class="tb-btn" style="display:none" id="exportBtn" title="Eksport" onclick="exportNote()">📥</div>
+  </div>
+
+  <div class="editor-area" id="editorArea">
+    <!-- EMPTY STATE -->
+    <div class="empty-state" id="emptyState">
+      <div class="es-icon">📝</div>
+      <div class="es-title">Qaydlar bo'sh</div>
+      <p class="es-sub">Yangi qayd yarating va fikrlaringizni, g'oyalaringizni yozib qo'ying.</p>
+      <button class="btn-create" onclick="openNewModal()">✏️ Birinchi qaydni yarating</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI PANEL (hidden by default) -->
+<div class="ai-panel" id="aiPanel" style="display:none">
+  <div class="ai-top">
+    <span>🤖</span>
+    <span class="ai-top-title">AI Yordam</span>
+    <div class="ai-close" onclick="toggleAI()">✕</div>
+  </div>
+  <div class="ai-body" id="aiBody">
+    <div class="ai-msg ai">Salom! Qaydingizni yaxshilashga yordam beraman. Quyidagi amallardan birini tanlang yoki o'z savolingizni yozing.</div>
+  </div>
+  <div class="ai-suggestions">
+    <div class="ai-sug" onclick="aiAction('Qaydni qisqacha xulosala')">📋 Xulosala</div>
+    <div class="ai-sug" onclick="aiAction('Grammatika va uslubni tuzat')">✍️ Tuzatish</div>
+    <div class="ai-sug" onclick="aiAction('G\'oyalarni kengaytir')">💡 Kengaytir</div>
+    <div class="ai-sug" onclick="aiAction('Sarlavhalar va ro\'yxatlar bilan format qil')">📑 Formatlash</div>
+    <div class="ai-sug" onclick="aiAction('Tarjima qil (ingliz tilga)')">🌐 Tarjima</div>
+  </div>
+  <div class="ai-input-wrap">
+    <div class="ai-inp-row">
+      <input class="ai-inp" id="aiInp" type="text" placeholder="AI ga savol..." onkeydown="if(event.key==='Enter')aiSend()">
+      <button class="ai-send" onclick="aiSend()">↑</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW NOTE MODAL -->
+<div class="modal-overlay" id="newModal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3>Yangi qayd</h3>
+    <input class="modal-inp" type="text" id="newTitle" placeholder="Qayd sarlavhasi..." maxlength="80">
+    <div class="modal-cats">
+      <button class="modal-cat sel" onclick="selCat(this,'loyiha')">🔵 Loyiha</button>
+      <button class="modal-cat" onclick="selCat(this,'shaxsiy')">🟣 Shaxsiy</button>
+      <button class="modal-cat" onclick="selCat(this,'oquv')">🟢 O'quv</button>
+      <button class="modal-cat" onclick="selCat(this,'goya')">🟡 G'oya</button>
+      <button class="modal-cat" onclick="selCat(this,'boshqa')">⚪ Boshqa</button>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Bekor</button>
+      <button class="modal-ok" onclick="createNote()">Yaratish</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const CAT_CONFIG = {
+  loyiha:  { label:'Loyiha',   color:'#7AB3FF', bg:'rgba(46,124,246,0.15)' },
+  shaxsiy: { label:'Shaxsiy',  color:'#C48AFF', bg:'rgba(160,100,255,0.15)' },
+  oquv:    { label:"O'quv",    color:'#00D9A0', bg:'rgba(0,217,160,0.12)' },
+  goya:    { label:"G'oya",    color:'#F6A32E', bg:'rgba(246,163,46,0.15)' },
+  boshqa:  { label:'Boshqa',   color:'#8BA3C2', bg:'rgba(139,163,194,0.12)' },
+};
+
+let notes = [
+  { id:1, title:"BrainOS loyiha g'oyalari", cat:'loyiha', pinned:true,
+    content:"<h2>Asosiy g'oyalar</h2><p>BrainOS — shaxsiy AI operatsion tizim. Har bir foydalanuvchi uchun moslashtirilgan muhit yaratish kerak.</p><p>Jismoniy va yuridik shaxslarni ajratish — har biri uchun alohida <strong>dashboard</strong> va <strong>modullar</strong>.</p><h3>Modullar ro'yxati</h3><ul><li>AI Chat — Claude API</li><li>Qaydlar — rich text editor</li><li>Kunlik reja — vazifalar</li><li>Moliya — xarajat tracker</li><li>O'qish — kitob tracker</li></ul>",
+    date:'Bugun, 14:32', words:87 },
+  { id:2, title:'Haftalik maqsadlar', cat:'goya', pinned:false,
+    content:"<h2>Bu hafta bajarilishi kerak</h2><p>Loyihaning asosiy frontend qismi tugatilishi kerak. Backend bilan integratsiya ham muhim.</p><ul><li>✅ Landing page</li><li>⬜ Dashboard</li><li>⬜ Chat module</li><li>⬜ Notes module</li><li>⬜ Supabase auth</li></ul><blockquote>Har kuni kamida 2 ta modul yakunlansin.</blockquote>",
+    date:'Kecha, 20:15', words:54 },
+  { id:3, title:'Clean Code eslatmalar', cat:'oquv', pinned:false,
+    content:"<h2>Robert C. Martin — Clean Code</h2><p>Asosiy tamoyillar:</p><ul><li><strong>DRY</strong> — Don't Repeat Yourself</li><li><strong>KISS</strong> — Keep It Simple, Stupid</li><li><strong>YAGNI</strong> — You Aren't Gonna Need It</li></ul><p>Funksiyalar kichik bo'lsin. Har bir funksiya <em>bitta</em> ishni bajarsin. Ism aniq va tushunarli bo'lsin.</p><p><code>function getUserById(id)</code> — yaxshi.<br><code>function doStuff(x)</code> — yomon.</p>",
+    date:'2 kun oldin', words:63 },
+  { id:4, title:'JavaScript ES6+ qo\'llanma', cat:'oquv', pinned:false,
+    content:"<h2>Zamonaviy JS imkoniyatlari</h2><p>ES6 va undan keyingi versiyalarda qo'shilgan muhim xususiyatlar:</p><ul><li><code>const</code> va <code>let</code> — blok scope</li><li>Arrow functions: <code>const fn = () => {}</code></li><li>Template literals: <code>`Salom ${ism}`</code></li><li>Destructuring: <code>const {a, b} = obj</code></li><li>Spread/Rest: <code>...args</code></li><li>Async/Await: asinxron kod</li><li>Modules: <code>import/export</code></li></ul>",
+    date:'3 kun oldin', words:72 },
+  { id:5, title:'Haftalik reflekciya', cat:'shaxsiy', pinned:false,
+    content:"<h2>Bu hafta nima bo'ldi?</h2><p>Juda samarali hafta bo'ldi. BrainOS loyihasida katta yutuqlar qilindi. Dizayn va frontend asosan tayyor.</p><h3>Yaxshi tomonlar</h3><ul><li>Har kuni 6-8 soat ish</li><li>Sport — 5 kun bajarildi</li><li>Kitob o'qish davom etdi</li></ul><h3>Yaxshilash kerak</h3><ul><li>Dam olish vaqtini ko'paytirish</li><li>Suv ko'proq ichish</li></ul>",
+    date:'5 kun oldin', words:68 },
+];
+let nextId = 6;
+let activeNoteId = null;
+let currentCat = 'all';
+let selectedModalCat = 'loyiha';
+let aiOpen = false;
+let saveTimer = null;
+
+// ── RENDER LIST ──
+function renderList(filter = '') {
+  const list = document.getElementById('notesList');
+  list.innerHTML = '';
+  const f = filter.toLowerCase();
+  let shown = notes.filter(n => {
+    const catOk = currentCat === 'all' || n.cat === currentCat;
+    const textOk = !f || n.title.toLowerCase().includes(f) || n.content.toLowerCase().includes(f);
+    return catOk && textOk;
+  });
+  // pinned first
+  shown.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  document.getElementById('noteCount').textContent = shown.length + ' ta';
+
+  if (!shown.length) {
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted2);font-size:13px">Hech narsa topilmadi</div>`;
+    return;
+  }
+  shown.forEach(n => {
+    const cc = CAT_CONFIG[n.cat] || CAT_CONFIG.boshqa;
+    const div = document.createElement('div');
+    div.className = 'note-item' + (n.id === activeNoteId ? ' active' : '');
+    div.onclick = () => openNote(n.id);
+    div.innerHTML = `
+      <div class="ni-top">
+        ${n.pinned ? '<span class="ni-pin">📌</span>' : ''}
+        <div class="ni-title">${n.title}</div>
+      </div>
+      <div class="ni-preview">${stripHtml(n.content)}</div>
+      <div class="ni-foot">
+        <span class="ni-date">${n.date}</span>
+        <span class="ni-cat" style="background:${cc.bg};color:${cc.color}">${cc.label}</span>
+        <span class="ni-del" onclick="event.stopPropagation();deleteNoteById(${n.id})">✕</span>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || '';
+}
+
+// ── OPEN NOTE ──
+function openNote(id) {
+  activeNoteId = id;
+  const n = notes.find(x => x.id === id);
+  if (!n) return;
+  renderList(document.getElementById('searchInp').value);
+
+  const area = document.getElementById('editorArea');
+  area.innerHTML = `
+    <div class="note-editor" id="noteEditor">
+      <div class="editor-meta">
+        <span class="meta-date">🕐 ${n.date}</span>
+        <span class="meta-sep">·</span>
+        <span class="meta-words" id="wordCount">${n.words} so'z</span>
+      </div>
+      <input class="editor-title" id="editorTitle" type="text" value="${n.title}" placeholder="Sarlavha..." oninput="titleChanged()">
+      <div class="editor-toolbar">
+        <button class="tb-fmt" title="H1" onclick="fmt('formatBlock','h1')"><b>H1</b></button>
+        <button class="tb-fmt" title="H2" onclick="fmt('formatBlock','h2')"><b>H2</b></button>
+        <button class="tb-fmt" title="H3" onclick="fmt('formatBlock','h3')"><b>H3</b></button>
+        <div class="tb-sep"></div>
+        <button class="tb-fmt" title="Bold" onclick="fmt('bold')"><b>B</b></button>
+        <button class="tb-fmt" title="Italic" onclick="fmt('italic')"><i>I</i></button>
+        <button class="tb-fmt" title="Underline" onclick="fmt('underline')"><u>U</u></button>
+        <div class="tb-sep"></div>
+        <button class="tb-fmt" title="Ro'yxat" onclick="fmt('insertUnorderedList')">• —</button>
+        <button class="tb-fmt" title="Raqamli ro'yxat" onclick="fmt('insertOrderedList')">1.</button>
+        <button class="tb-fmt" title="Iqtibos" onclick="fmt('formatBlock','blockquote')">"</button>
+        <div class="tb-sep"></div>
+        <button class="tb-fmt" title="Link" onclick="addLink()">🔗</button>
+        <button class="tb-fmt" title="Gorizontal chiziq" onclick="fmt('insertHorizontalRule')">—</button>
+        <button class="tb-fmt" title="Tozalash" onclick="fmt('removeFormat')">✕</button>
+      </div>
+      <div class="editor-body">
+        <div class="editor-content" id="editorContent" contenteditable="true"
+          data-placeholder="Yozishni boshlang..."
+          oninput="contentChanged()">${n.content}</div>
+      </div>
+      <div class="editor-footer">
+        <div class="ef-status"><span class="ef-dot"></span><span id="saveStatus">Saqlandi</span></div>
+        <div class="ef-sp"></div>
+        <button class="ef-ai" onclick="toggleAI()">🤖 AI yordam</button>
+        <button class="ef-save" onclick="saveNote()">💾 Saqlash</button>
+      </div>
+    </div>`;
+
+  // topbar controls
+  const catSel = document.getElementById('catSelect');
+  catSel.style.display = 'block';
+  catSel.value = n.cat;
+  document.getElementById('pinBtn').style.display = 'flex';
+  document.getElementById('pinBtn').textContent = n.pinned ? '📌' : '📎';
+  document.getElementById('aiToggleBtn').style.display = 'flex';
+  document.getElementById('deleteBtn').style.display = 'flex';
+  document.getElementById('exportBtn').style.display = 'flex';
+}
+
+// ── FORMAT ──
+function fmt(cmd, val) {
+  document.getElementById('editorContent')?.focus();
+  document.execCommand(cmd, false, val || null);
+}
+function addLink() {
+  const url = prompt('URL kiriting:');
+  if (url) document.execCommand('createLink', false, url);
+}
+
+// ── SAVE ──
+function contentChanged() {
+  const el = document.getElementById('editorContent');
+  if (!el || !activeNoteId) return;
+  const n = notes.find(x => x.id === activeNoteId);
+  if (!n) return;
+  n.content = el.innerHTML;
+  n.words = stripHtml(el.innerHTML).trim().split(/\s+/).filter(Boolean).length;
+  const wc = document.getElementById('wordCount');
+  if (wc) wc.textContent = n.words + ' so\'z';
+  const ss = document.getElementById('saveStatus');
+  if (ss) { ss.textContent = 'Saqlanmoqda...'; ss.style.color = 'var(--warn)'; }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (ss) { ss.textContent = 'Saqlandi ✓'; ss.style.color = 'var(--accent2)'; }
+    renderList(document.getElementById('searchInp').value);
+  }, 800);
+}
+
+function titleChanged() {
+  const el = document.getElementById('editorTitle');
+  if (!el || !activeNoteId) return;
+  const n = notes.find(x => x.id === activeNoteId);
+  if (n) n.title = el.value;
+}
+
+function saveNote() {
+  const n = notes.find(x => x.id === activeNoteId);
+  if (!n) return;
+  const d = new Date();
+  n.date = 'Bugun, ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  renderList(document.getElementById('searchInp').value);
+  const ss = document.getElementById('saveStatus');
+  if (ss) { ss.textContent = 'Saqlandi ✓'; ss.style.color = 'var(--accent2)'; }
+}
+
+// ── CAT / PIN / DELETE ──
+function updateCat() {
+  const n = notes.find(x => x.id === activeNoteId);
+  if (!n) return;
+  n.cat = document.getElementById('catSelect').value;
+  renderList(document.getElementById('searchInp').value);
+}
+
+function togglePin() {
+  const n = notes.find(x => x.id === activeNoteId);
+  if (!n) return;
+  n.pinned = !n.pinned;
+  document.getElementById('pinBtn').textContent = n.pinned ? '📌' : '📎';
+  renderList(document.getElementById('searchInp').value);
+}
+
+function deleteNote() {
+  if (!activeNoteId) return;
+  if (!confirm('Bu qaydni o\'chirishni xohlaysizmi?')) return;
+  deleteNoteById(activeNoteId);
+}
+function deleteNoteById(id) {
+  notes = notes.filter(n => n.id !== id);
+  if (activeNoteId === id) {
+    activeNoteId = null;
+    document.getElementById('editorArea').innerHTML = `
+      <div class="empty-state"><div class="es-icon">📝</div>
+      <div class="es-title">Qayd o'chirildi</div>
+      <p class="es-sub">Chap paneldan boshqa qaydni tanlang yoki yangi yarating.</p>
+      <button class="btn-create" onclick="openNewModal()">✏️ Yangi qayd</button></div>`;
+    ['catSelect','pinBtn','aiToggleBtn','deleteBtn','exportBtn'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
+  renderList(document.getElementById('searchInp').value);
+}
+
+function exportNote() {
+  const n = notes.find(x => x.id === activeNoteId);
+  if (!n) return;
+  const text = n.title + '\n\n' + stripHtml(n.content);
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = n.title.replace(/\s+/g,'-') + '.txt';
+  a.click();
+}
+
+// ── FILTER ──
+function filterNotes() { renderList(document.getElementById('searchInp').value); }
+function filterCat(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = cat;
+  renderList(document.getElementById('searchInp').value);
+}
+
+// ── NEW NOTE MODAL ──
+function openNewModal() {
+  document.getElementById('newModal').style.display = 'flex';
+  document.getElementById('newTitle').value = '';
+  setTimeout(() => document.getElementById('newTitle').focus(), 100);
+}
+function closeModal() { document.getElementById('newModal').style.display = 'none'; }
+function selCat(btn, cat) {
+  document.querySelectorAll('.modal-cat').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedModalCat = cat;
+}
+function createNote() {
+  const title = document.getElementById('newTitle').value.trim();
+  if (!title) { document.getElementById('newTitle').focus(); return; }
+  const d = new Date();
+  const time = 'Bugun, ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  const n = { id: nextId++, title, cat: selectedModalCat, pinned: false, content: '', date: time, words: 0 };
+  notes.unshift(n);
+  closeModal();
+  renderList('');
+  openNote(n.id);
+  setTimeout(() => document.getElementById('editorContent')?.focus(), 200);
+}
+document.getElementById('newTitle')?.addEventListener('keydown', e => { if (e.key === 'Enter') createNote(); });
+
+// ── AI PANEL ──
+function toggleAI() {
+  aiOpen = !aiOpen;
+  document.getElementById('aiPanel').style.display = aiOpen ? 'flex' : 'none';
+}
+function aiAction(prompt) {
+  const n = notes.find(x => x.id === activeNoteId);
+  if (!n) { addAiMsg('ai','Avval qayd tanlang!'); return; }
+  addAiMsg('user', prompt);
+  addAiMsg('ai', '⏳ Qayd tahlil qilinmoqda...');
+  setTimeout(async () => {
+    try {
+      const res = await fetch('/chat', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message: prompt + '\n\nMatn:\n' + stripHtml(n.content) })
+      });
+      const data = await res.json();
+      updateLastAiMsg(data.reply || 'Javob olinmadi.');
+    } catch { updateLastAiMsg('Server bilan bog\'lanib bo\'lmadi.'); }
+  }, 500);
+}
+function aiSend() {
+  const inp = document.getElementById('aiInp');
+  const val = inp.value.trim();
+  if (!val) return;
+  inp.value = '';
+  aiAction(val);
+}
+function addAiMsg(role, text) {
+  const body = document.getElementById('aiBody');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+function updateLastAiMsg(text) {
+  const msgs = document.querySelectorAll('#aiBody .ai-msg.ai');
+  if (msgs.length) msgs[msgs.length-1].textContent = text;
+}
+
+// INIT
+renderList('');
+</script>
+</body>
+</html>

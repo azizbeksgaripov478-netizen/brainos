@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainOS — Kunlik Reja</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050A14;--bg2:#07101F;--surface:#0D1B33;--card:#0A172B;
+  --border:#162840;--border2:#1E3555;--accent:#2E7CF6;--accent2:#00D9A0;
+  --warn:#F6A32E;--danger:#F65C2E;--purple:#A064FF;
+  --text:#EFF4FF;--muted:#7A9BBF;--muted2:#3D5A7A;--sw:230px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.g1,.g2{position:fixed;pointer-events:none;z-index:0;border-radius:50%;}
+.g1{width:600px;height:600px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(46,124,246,0.09) 0%,transparent 65%);}
+.g2{width:450px;height:450px;bottom:-80px;right:-60px;background:radial-gradient(circle,rgba(0,217,160,0.07) 0%,transparent 65%);}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;}
+.s-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.s-mark{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.s-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.s-nav{flex:1;overflow-y:auto;padding:12px 8px;display:flex;flex-direction:column;gap:1px;}
+.s-sec{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:1.3px;text-transform:uppercase;padding:10px 8px 5px;}
+.s-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13.5px;transition:all 0.17s;position:relative;user-select:none;text-decoration:none;}
+.s-item:hover{background:rgba(46,124,246,0.07);color:var(--text);}
+.s-item.active{background:rgba(46,124,246,0.11);color:#7AB3FF;font-weight:500;}
+.s-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2.5px;border-radius:0 3px 3px 0;background:var(--accent);}
+.s-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.s-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;min-width:18px;text-align:center;}
+.sb-b{background:rgba(46,124,246,0.25);color:#7AB3FF;} .sb-w{background:rgba(246,163,46,0.2);color:var(--warn);}
+.s-user{padding:10px 8px;border-top:1px solid var(--border);}
+.u-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.17s;}
+.u-row:hover{background:rgba(255,255,255,0.04);}
+.u-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#2E7CF6,#00D9A0);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#fff;}
+.u-nm{font-size:13px;font-weight:600;} .u-pl{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px;}
+.u-dt{width:5px;height:5px;border-radius:50%;background:var(--accent2);} .u-mo{margin-left:auto;color:var(--muted2);font-size:16px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+
+/* TOPBAR */
+.topbar{height:56px;flex-shrink:0;padding:0 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:rgba(5,10,20,0.75);backdrop-filter:blur(14px);}
+.tb-ttl{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.tb-sp{flex:1;}
+.view-btns{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;}
+.view-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.view-btn.active{background:var(--accent);color:#fff;}
+.tb-btn{width:34px;height:34px;border-radius:9px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--muted);transition:all 0.17s;flex-shrink:0;}
+.tb-btn:hover{border-color:var(--border2);color:var(--text);}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:22px 24px 28px;display:flex;flex-direction:column;gap:20px;}
+
+/* DATE HEADER */
+.date-header{display:flex;align-items:center;gap:16px;animation:fup 0.4s ease both;}
+.date-nav{width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted);transition:all 0.17s;flex-shrink:0;}
+.date-nav:hover{border-color:var(--border2);color:var(--text);}
+.date-info{flex:1;}
+.date-main{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.date-main span{background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.date-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+.date-today{padding:6px 14px;border-radius:8px;background:rgba(46,124,246,0.12);border:1px solid rgba(46,124,246,0.25);color:#7AB3FF;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.17s;font-family:'DM Sans',sans-serif;}
+.date-today:hover{background:rgba(46,124,246,0.18);}
+.add-task-btn{padding:8px 16px;border-radius:9px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.17s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;}
+.add-task-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,124,246,0.35);}
+
+/* PROGRESS BAR */
+.day-progress{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;animation:fup 0.4s 0.07s ease both;}
+.dp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.dp-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.dp-pct{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent);}
+.dp-bar{height:8px;background:var(--border);border-radius:5px;overflow:hidden;margin-bottom:10px;}
+.dp-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#2E7CF6,#00D9A0);transition:width 0.8s ease;}
+.dp-stats{display:flex;gap:20px;}
+.dp-stat{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.dp-dot{width:6px;height:6px;border-radius:50%;}
+
+/* MAIN GRID */
+.plan-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;animation:fup 0.4s 0.14s ease both;}
+
+/* TASKS SECTION */
+.tasks-section{display:flex;flex-direction:column;gap:16px;}
+.section-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.sh-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.sh-count{font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:1px 7px;border-radius:10px;}
+.sh-sp{flex:1;}
+.sh-add{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600;transition:opacity 0.17s;}
+.sh-add:hover{opacity:0.7;}
+
+/* TASK CARD */
+.task-group{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.task-group-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.tgh-icon{font-size:14px;}
+.tgh-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.tgh-count{font-size:11px;color:var(--muted);}
+
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(22,40,64,0.5);cursor:pointer;transition:all 0.15s;position:relative;}
+.task-item:last-child{border-bottom:none;}
+.task-item:hover{background:rgba(46,124,246,0.04);}
+.task-item.dragging{opacity:0.5;}
+
+.t-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.18s;cursor:pointer;}
+.t-check.done{background:var(--accent2);border-color:var(--accent2);color:#050A14;font-weight:800;}
+.t-check.inprogress{background:rgba(246,163,46,0.2);border-color:var(--warn);color:var(--warn);}
+
+.t-body{flex:1;}
+.t-title{font-size:13.5px;font-weight:500;margin-bottom:4px;transition:all 0.18s;}
+.t-title.done{text-decoration:line-through;color:var(--muted);}
+.t-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.t-tag{font-size:10.5px;padding:2px 7px;border-radius:5px;font-weight:600;}
+.t-time{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:3px;}
+.t-dur{font-size:11px;color:var(--muted2);}
+
+.t-priority{width:3px;height:100%;position:absolute;left:0;top:0;bottom:0;border-radius:0;}
+.t-actions{display:flex;gap:4px;margin-left:auto;opacity:0;transition:opacity 0.17s;flex-shrink:0;}
+.task-item:hover .t-actions{opacity:1;}
+.t-act{width:24px;height:24px;border-radius:6px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;transition:all 0.15s;color:var(--muted);}
+.t-act:hover{color:var(--text);border-color:var(--border2);}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;gap:16px;}
+
+/* MINI CALENDAR */
+.cal-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.cal-head-row{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cal-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.cal-navs{display:flex;gap:4px;}
+.cal-nav{width:24px;height:24px;border-radius:6px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);transition:all 0.15s;}
+.cal-nav:hover{color:var(--text);border-color:var(--border2);}
+.cal-body{padding:12px 14px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-lbl{font-size:9.5px;color:var(--muted2);text-align:center;font-weight:700;padding:2px 0;}
+.cal-d{aspect-ratio:1;border-radius:6px;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.13s;color:var(--muted);}
+.cal-d:hover{background:var(--border);color:var(--text);}
+.cal-d.today{background:var(--accent);color:#fff;font-weight:700;}
+.cal-d.selected{background:rgba(46,124,246,0.2);color:#7AB3FF;border:1px solid rgba(46,124,246,0.3);}
+.cal-d.has-task{position:relative;color:var(--text);}
+.cal-d.has-task::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--accent2);}
+.cal-d.dim{color:var(--muted2);opacity:0.35;}
+
+/* HABITS CARD */
+.habits-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.hc-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.hc-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+.hc-add{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600;}
+.habit-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(22,40,64,0.5);}
+.habit-row:last-child{border-bottom:none;}
+.h-em{font-size:18px;width:24px;text-align:center;flex-shrink:0;}
+.h-info{flex:1;}
+.h-name{font-size:13px;font-weight:500;}
+.h-streak{font-size:11px;color:var(--warn);margin-top:1px;}
+.h-days{display:flex;gap:3px;}
+.h-day{width:20px;height:20px;border-radius:5px;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;}
+.hd{background:var(--accent2);color:#050A14;}
+.hm{background:var(--border);color:var(--muted2);}
+.ht{background:rgba(46,124,246,0.22);color:var(--accent);border:1px solid rgba(46,124,246,0.4);}
+.h-toggle{width:28px;height:16px;border-radius:8px;background:var(--accent2);position:relative;cursor:pointer;flex-shrink:0;transition:all 0.2s;}
+.h-toggle::after{content:'';position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#050A14;transition:all 0.2s;}
+
+/* FOCUS TIMER */
+.timer-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.timer-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.timer-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+.timer-body{padding:16px;text-align:center;}
+.timer-display{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;background:linear-gradient(135deg,#2E7CF6,#00D9A0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.timer-label{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.timer-btns{display:flex;gap:8px;justify-content:center;}
+.timer-btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.17s;}
+.tbtn-start{background:linear-gradient(135deg,#2E7CF6,#1660D0);color:#fff;}
+.tbtn-start:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,124,246,0.35);}
+.tbtn-reset{background:var(--surface);color:var(--muted);border:1px solid var(--border);}
+.tbtn-reset:hover{color:var(--text);border-color:var(--border2);}
+.timer-modes{display:flex;gap:4px;justify-content:center;margin-top:10px;}
+.tmode{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.tmode.active{background:rgba(46,124,246,0.15);color:#7AB3FF;border-color:rgba(46,124,246,0.3);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:420px;max-width:90vw;animation:fup 0.2s ease both;}
+.modal h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;}
+.m-row{margin-bottom:12px;}
+.m-label{font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;}
+.m-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;}
+.m-inp:focus{border-color:rgba(46,124,246,0.4);}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.m-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;}
+.m-select:focus{border-color:rgba(46,124,246,0.4);}
+.m-priorities{display:flex;gap:6px;}
+.m-pri{padding:5px 12px;border-radius:15px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.m-pri.sel-high{background:rgba(246,92,46,0.15);color:var(--danger);border-color:rgba(246,92,46,0.3);}
+.m-pri.sel-mid{background:rgba(246,163,46,0.15);color:var(--warn);border-color:rgba(246,163,46,0.3);}
+.m-pri.sel-low{background:rgba(0,217,160,0.12);color:var(--accent2);border-color:rgba(0,217,160,0.3);}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.m-cancel{padding:8px 16px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.m-ok{padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#2E7CF6,#1660D0);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+@keyframes fup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="g1"></div><div class="g2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo"><div class="s-mark">B</div><span class="s-name">BrainOS</span></div>
+  <nav class="s-nav">
+    <div class="s-sec">Asosiy</div>
+    <a class="s-item" href="dashboard.html"><span class="s-ico">🏠</span>Dashboard</a>
+    <a class="s-item" href="chat.html"><span class="s-ico">💬</span>AI Chat<span class="s-badge sb-b">3</span></a>
+    <a class="s-item" href="notes.html"><span class="s-ico">📝</span>Qaydlar</a>
+    <div class="s-item active"><span class="s-ico">📅</span>Kunlik reja</div>
+    <a class="s-item" href="reminders.html"><span class="s-ico">⏰</span>Eslatmalar</a>
+    <div class="s-sec" style="margin-top:6px">Rivojlanish</div>
+    <a class="s-item" href="#"><span class="s-ico">🎯</span>Odatlar</a>
+    <a class="s-item" href="reading.html"><span class="s-ico">📚</span>O'qish</a>
+    <a class="s-item" href="finance.html"><span class="s-ico">💰</span>Moliya</a>
+    <div class="s-sec" style="margin-top:6px">Boshqa</div>
+    <a class="s-item" href="#"><span class="s-ico">📊</span>Statistika</a>
+    <a class="s-item" href="auth.html"><span class="s-ico">🚪</span>Chiqish</a>
+  </nav>
+  <div class="s-user"><div class="u-row"><div class="u-av">AK</div><div><div class="u-nm">Azizbek</div><div class="u-pl"><span class="u-dt"></span>Free plan</div></div><div class="u-mo">⋯</div></div></div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-ttl">Kunlik Reja</span>
+    <div class="tb-sp"></div>
+    <div class="view-btns">
+      <button class="view-btn active" onclick="setView(this,'day')">Kun</button>
+      <button class="view-btn" onclick="setView(this,'week')">Hafta</button>
+      <button class="view-btn" onclick="setView(this,'month')">Oy</button>
+    </div>
+    <div class="tb-btn" title="AI reja" onclick="aiPlan()">🤖</div>
+    <div class="tb-btn" title="Yangi vazifa" onclick="openModal()">+</div>
+  </div>
+
+  <div class="content">
+
+    <!-- DATE HEADER -->
+    <div class="date-header">
+      <div class="date-nav" onclick="changeDay(-1)">‹</div>
+      <div class="date-info">
+        <div class="date-main" id="dateMain">Bugun — <span id="dateSpan">19 May, Dushanba</span></div>
+        <div class="date-sub" id="dateSub">3 ta vazifa bajarildi · 2 ta qoldi</div>
+      </div>
+      <button class="date-today" onclick="goToday()">Bugun</button>
+      <button class="add-task-btn" onclick="openModal()">+ Vazifa qo'shish</button>
+      <div class="date-nav" onclick="changeDay(1)">›</div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="day-progress">
+      <div class="dp-top">
+        <span class="dp-title">Kunlik progress</span>
+        <span class="dp-pct" id="progressPct">60%</span>
+      </div>
+      <div class="dp-bar"><div class="dp-fill" id="progressBar" style="width:60%"></div></div>
+      <div class="dp-stats">
+        <div class="dp-stat"><span class="dp-dot" style="background:var(--accent2)"></span><span id="doneCount">3 ta bajarildi</span></div>
+        <div class="dp-stat"><span class="dp-dot" style="background:var(--warn)"></span><span id="leftCount">2 ta qoldi</span></div>
+        <div class="dp-stat"><span class="dp-dot" style="background:var(--muted2)"></span><span id="totalCount">5 ta jami</span></div>
+      </div>
+    </div>
+
+    <!-- PLAN GRID -->
+    <div class="plan-grid">
+
+      <!-- LEFT: TASKS -->
+      <div class="tasks-section">
+
+        <!-- MUHIM -->
+        <div>
+          <div class="section-head">
+            <span style="font-size:15px">🔴</span>
+            <span class="sh-title">Muhim vazifalar</span>
+            <span class="sh-count" id="urgentCount">2 ta</span>
+            <div class="sh-sp"></div>
+            <span class="sh-add" onclick="openModal('urgent')">+ Qo'shish</span>
+          </div>
+          <div class="task-group" id="urgentList">
+            <div class="task-item" onclick="toggleTask(this)">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--danger);border-radius:0;"></div>
+              <div class="t-check" style="margin-left:8px"></div>
+              <div class="t-body">
+                <div class="t-title">Dashboard dizaynini yakunlash</div>
+                <div class="t-meta">
+                  <span class="t-tag" style="background:rgba(46,124,246,0.15);color:#7AB3FF">Loyiha</span>
+                  <span class="t-time">⏰ 14:00–16:00</span>
+                  <span class="t-dur">2 soat</span>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-act" onclick="event.stopPropagation();editTask(this)" title="Tahrirlash">✏️</div>
+                <div class="t-act" onclick="event.stopPropagation();deleteTask(this)" title="O'chirish">🗑️</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--danger);border-radius:0;"></div>
+              <div class="t-check" style="margin-left:8px"></div>
+              <div class="t-body">
+                <div class="t-title">Supabase auth integratsiyasi</div>
+                <div class="t-meta">
+                  <span class="t-tag" style="background:rgba(0,217,160,0.12);color:#00D9A0">Backend</span>
+                  <span class="t-time">⏰ 16:00–18:00</span>
+                  <span class="t-dur">2 soat</span>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-act" onclick="event.stopPropagation();editTask(this)" title="Tahrirlash">✏️</div>
+                <div class="t-act" onclick="event.stopPropagation();deleteTask(this)" title="O'chirish">🗑️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ODDIY -->
+        <div>
+          <div class="section-head">
+            <span style="font-size:15px">🟡</span>
+            <span class="sh-title">Oddiy vazifalar</span>
+            <span class="sh-count" id="normalCount">3 ta</span>
+            <div class="sh-sp"></div>
+            <span class="sh-add" onclick="openModal('normal')">+ Qo'shish</span>
+          </div>
+          <div class="task-group" id="normalList">
+            <div class="task-item" onclick="toggleTask(this)">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--warn);border-radius:0;"></div>
+              <div class="t-check done" style="margin-left:8px">✓</div>
+              <div class="t-body">
+                <div class="t-title done">Ertalabki badantarbiya</div>
+                <div class="t-meta">
+                  <span class="t-tag" style="background:rgba(246,163,46,0.15);color:#F6A32E">Sog'liq</span>
+                  <span class="t-time">⏰ 07:00–07:30</span>
+                  <span class="t-dur">30 daqiqa</span>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-act" onclick="event.stopPropagation();editTask(this)">✏️</div>
+                <div class="t-act" onclick="event.stopPropagation();deleteTask(this)">🗑️</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--warn);border-radius:0;"></div>
+              <div class="t-check done" style="margin-left:8px">✓</div>
+              <div class="t-body">
+                <div class="t-title done">BrainOS landing page</div>
+                <div class="t-meta">
+                  <span class="t-tag" style="background:rgba(46,124,246,0.15);color:#7AB3FF">Loyiha</span>
+                  <span class="t-time">⏰ 09:00–12:00</span>
+                  <span class="t-dur">3 soat</span>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-act" onclick="event.stopPropagation();editTask(this)">✏️</div>
+                <div class="t-act" onclick="event.stopPropagation();deleteTask(this)">🗑️</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent2);border-radius:0;"></div>
+              <div class="t-check" style="margin-left:8px"></div>
+              <div class="t-body">
+                <div class="t-title">Kitob o'qish — 30 daqiqa</div>
+                <div class="t-meta">
+                  <span class="t-tag" style="background:rgba(160,100,255,0.15);color:#C48AFF">Shaxsiy</span>
+                  <span class="t-time">⏰ 21:00–21:30</span>
+                  <span class="t-dur">30 daqiqa</span>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-act" onclick="event.stopPropagation();editTask(this)">✏️</div>
+                <div class="t-act" onclick="event.stopPropagation();deleteTask(this)">🗑️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+
+        <!-- MINI CALENDAR -->
+        <div class="cal-card">
+          <div class="cal-head-row">
+            <span class="cal-title" id="calTitle">May 2026</span>
+            <div class="cal-navs">
+              <div class="cal-nav" onclick="calPrev()">‹</div>
+              <div class="cal-nav" onclick="calNext()">›</div>
+            </div>
+          </div>
+          <div class="cal-body">
+            <div class="cal-grid" id="calGrid">
+              <div class="cal-lbl">Du</div><div class="cal-lbl">Se</div><div class="cal-lbl">Ch</div>
+              <div class="cal-lbl">Pa</div><div class="cal-lbl">Ju</div><div class="cal-lbl">Sh</div><div class="cal-lbl">Ya</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HABITS -->
+        <div class="habits-card">
+          <div class="hc-head">
+            <span style="font-size:15px">🎯</span>
+            <span class="hc-title">Bugungi odatlar</span>
+            <span class="hc-add" onclick="toggleHabit()">Hammasi →</span>
+          </div>
+          <div class="habit-row">
+            <span class="h-em">🏋️</span>
+            <div class="h-info"><div class="h-name">Sport</div><div class="h-streak">🔥 14 kun streak</div></div>
+            <div class="h-days">
+              <div class="h-day hd">D</div><div class="h-day hd">S</div><div class="h-day hd">Ch</div>
+              <div class="h-day hm">P</div><div class="h-day hd">J</div><div class="h-day hd">Sh</div><div class="h-day ht">Y</div>
+            </div>
+          </div>
+          <div class="habit-row">
+            <span class="h-em">📚</span>
+            <div class="h-info"><div class="h-name">O'qish</div><div class="h-streak">🔥 8 kun streak</div></div>
+            <div class="h-days">
+              <div class="h-day hd">D</div><div class="h-day hd">S</div><div class="h-day hm">Ch</div>
+              <div class="h-day hd">P</div><div class="h-day hd">J</div><div class="h-day hm">Sh</div><div class="h-day ht">Y</div>
+            </div>
+          </div>
+          <div class="habit-row">
+            <span class="h-em">💧</span>
+            <div class="h-info"><div class="h-name">Suv ichish</div><div class="h-streak">🔥 21 kun streak</div></div>
+            <div class="h-days">
+              <div class="h-day hd">D</div><div class="h-day hd">S</div><div class="h-day hd">Ch</div>
+              <div class="h-day hd">P</div><div class="h-day hd">J</div><div class="h-day hd">Sh</div><div class="h-day ht">Y</div>
+            </div>
+          </div>
+          <div class="habit-row">
+            <span class="h-em">🧘</span>
+            <div class="h-info"><div class="h-name">Meditatsiya</div><div class="h-streak">⚡ 3 kun streak</div></div>
+            <div class="h-days">
+              <div class="h-day hd">D</div><div class="h-day hm">S</div><div class="h-day hd">Ch</div>
+              <div class="h-day hm">P</div><div class="h-day hd">J</div><div class="h-day hm">Sh</div><div class="h-day ht">Y</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOCUS TIMER -->
+        <div class="timer-card">
+          <div class="timer-head">
+            <span style="font-size:15px">⏱️</span>
+            <span class="timer-title">Focus Timer</span>
+          </div>
+          <div class="timer-body">
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <div class="timer-label" id="timerLabel">Pomodoro — Ishlash vaqti</div>
+            <div class="timer-btns">
+              <button class="timer-btn tbtn-start" id="timerBtn" onclick="timerToggle()">▶ Boshlash</button>
+              <button class="timer-btn tbtn-reset" onclick="timerReset()">↺ Reset</button>
+            </div>
+            <div class="timer-modes">
+              <button class="tmode active" onclick="setMode(this,25,'Pomodoro')">🍅 25 daq</button>
+              <button class="tmode" onclick="setMode(this,5,'Dam olish')">☕ 5 daq</button>
+              <button class="tmode" onclick="setMode(this,15,'Uzoq dam')">🌿 15 daq</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-overlay" id="taskModal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3>Yangi vazifa</h3>
+    <div class="m-row">
+      <div class="m-label">Vazifa nomi</div>
+      <input class="m-inp" type="text" id="taskTitle" placeholder="Vazifa nomini kiriting...">
+    </div>
+    <div class="m-row m-grid">
+      <div>
+        <div class="m-label">Boshlanish vaqti</div>
+        <input class="m-inp" type="time" id="taskStart" value="09:00">
+      </div>
+      <div>
+        <div class="m-label">Tugash vaqti</div>
+        <input class="m-inp" type="time" id="taskEnd" value="10:00">
+      </div>
+    </div>
+    <div class="m-row">
+      <div class="m-label">Kategoriya</div>
+      <select class="m-select" id="taskCat">
+        <option value="loyiha">🔵 Loyiha</option>
+        <option value="backend">🟢 Backend</option>
+        <option value="shaxsiy">🟣 Shaxsiy</option>
+        <option value="sogliq">🟡 Sog'liq</option>
+        <option value="oquv">📚 O'quv</option>
+      </select>
+    </div>
+    <div class="m-row">
+      <div class="m-label">Muhimlik darajasi</div>
+      <div class="m-priorities">
+        <button class="m-pri" onclick="selPri(this,'urgent')" style="color:var(--danger)">🔴 Muhim</button>
+        <button class="m-pri sel-mid" onclick="selPri(this,'normal')" style="color:var(--warn)">🟡 Oddiy</button>
+        <button class="m-pri" onclick="selPri(this,'low')" style="color:var(--accent2)">🟢 Past</button>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal()">Bekor</button>
+      <button class="m-ok" onclick="addTask()">Qo'shish</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATE
+const DAYS=['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
+const MONTHS_UZ=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+let currentDate = new Date();
+
+function updateDateHeader(){
+  const d=currentDate;
+  const isToday=new Date().toDateString()===d.toDateString();
+  document.getElementById('dateMain').innerHTML=(isToday?'Bugun — ':'')+'<span>'+d.getDate()+' '+MONTHS_UZ[d.getMonth()]+', '+DAYS[d.getDay()]+'</span>';
+  updateProgress();
+}
+
+function changeDay(n){ currentDate.setDate(currentDate.getDate()+n); updateDateHeader(); }
+function goToday(){ currentDate=new Date(); updateDateHeader(); }
+function setView(btn,v){ document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+
+// PROGRESS
+function updateProgress(){
+  const all=document.querySelectorAll('.task-item').length;
+  const done=document.querySelectorAll('.t-check.done').length;
+  const pct=all?Math.round(done/all*100):0;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('doneCount').textContent=done+' ta bajarildi';
+  document.getElementById('leftCount').textContent=(all-done)+' ta qoldi';
+  document.getElementById('totalCount').textContent=all+' ta jami';
+}
+
+// TASK TOGGLE
+function toggleTask(row){
+  const ck=row.querySelector('.t-check');
+  const nm=row.querySelector('.t-title');
+  if(ck.classList.contains('done')){ck.classList.remove('done');ck.textContent='';nm.classList.remove('done');}
+  else{ck.classList.add('done');ck.textContent='✓';nm.classList.add('done');}
+  updateProgress();
+}
+function deleteTask(btn){ if(confirm('O\'chirilsinmi?')) btn.closest('.task-item').remove(); updateProgress(); }
+function editTask(btn){
+  const row=btn.closest('.task-item');
+  const title=row.querySelector('.t-title').textContent;
+  const newTitle=prompt('Tahrirlash:',title);
+  if(newTitle&&newTitle.trim()) row.querySelector('.t-title').textContent=newTitle.trim();
+}
+
+// MODAL
+let targetList='normal';
+function openModal(list){
+  targetList=list||'normal';
+  document.getElementById('taskModal').style.display='flex';
+  setTimeout(()=>document.getElementById('taskTitle').focus(),100);
+}
+function closeModal(){ document.getElementById('taskModal').style.display='none'; }
+function selPri(btn,pri){
+  document.querySelectorAll('.m-pri').forEach(b=>{b.classList.remove('sel-high','sel-mid','sel-low');});
+  btn.classList.add(pri==='urgent'?'sel-high':pri==='normal'?'sel-mid':'sel-low');
+  targetList=pri==='urgent'?'urgent':'normal';
+}
+
+function addTask(){
+  const title=document.getElementById('taskTitle').value.trim();
+  if(!title) return;
+  const start=document.getElementById('taskStart').value;
+  const end=document.getElementById('taskEnd').value;
+  const catVal=document.getElementById('taskCat').value;
+  const catColors={loyiha:'rgba(46,124,246,0.15)',backend:'rgba(0,217,160,0.12)',shaxsiy:'rgba(160,100,255,0.15)',sogliq:'rgba(246,163,46,0.15)',oquv:'rgba(160,100,255,0.12)'};
+  const catTextColors={loyiha:'#7AB3FF',backend:'#00D9A0',shaxsiy:'#C48AFF',sogliq:'#F6A32E',oquv:'#C48AFF'};
+  const catLabels={loyiha:'Loyiha',backend:'Backend',shaxsiy:'Shaxsiy',sogliq:"Sog'liq",oquv:"O'quv"};
+  const priColor=targetList==='urgent'?'var(--danger)':'var(--warn)';
+  const listId=targetList==='urgent'?'urgentList':'normalList';
+  const list=document.getElementById(listId);
+  const div=document.createElement('div');
+  div.className='task-item';
+  div.onclick=()=>toggleTask(div);
+  div.innerHTML=`
+    <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${priColor};border-radius:0;"></div>
+    <div class="t-check" style="margin-left:8px"></div>
+    <div class="t-body">
+      <div class="t-title">${title}</div>
+      <div class="t-meta">
+        <span class="t-tag" style="background:${catColors[catVal]||'rgba(139,163,194,0.12)'};color:${catTextColors[catVal]||'#8BA3C2'}">${catLabels[catVal]||catVal}</span>
+        <span class="t-time">⏰ ${start}–${end}</span>
+      </div>
+    </div>
+    <div class="t-actions">
+      <div class="t-act" onclick="event.stopPropagation();editTask(this)">✏️</div>
+      <div class="t-act" onclick="event.stopPropagation();deleteTask(this)">🗑️</div>
+    </div>`;
+  list.appendChild(div);
+  closeModal();
+  updateProgress();
+  document.getElementById('taskTitle').value='';
+}
+document.getElementById('taskTitle')?.addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+
+// CALENDAR
+const TASK_DAYS=[3,7,12,19,22,28];
+let cY=2026,cM=4;
+function renderCal(){
+  document.getElementById('calTitle').textContent=MONTHS_UZ[cM]+' '+cY;
+  const g=document.getElementById('calGrid');
+  const lbs=[...g.querySelectorAll('.cal-lbl')];
+  g.innerHTML='';lbs.forEach(l=>g.appendChild(l));
+  const fd=new Date(cY,cM,1).getDay();
+  const off=fd===0?6:fd-1;
+  const prevDays=new Date(cY,cM,0).getDate();
+  const days=new Date(cY,cM+1,0).getDate();
+  const td=new Date();
+  for(let i=0;i<off;i++){const d=document.createElement('div');d.className='cal-d dim';d.textContent=prevDays-off+1+i;g.appendChild(d);}
+  for(let d=1;d<=days;d++){
+    const el=document.createElement('div');el.className='cal-d';el.textContent=d;
+    if(d===td.getDate()&&cM===td.getMonth()&&cY===td.getFullYear())el.classList.add('today');
+    if(TASK_DAYS.includes(d))el.classList.add('has-task');
+    el.onclick=()=>{document.querySelectorAll('.cal-d').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');};
+    g.appendChild(el);
+  }
+}
+function calPrev(){cM--;if(cM<0){cM=11;cY--;}renderCal();}
+function calNext(){cM++;if(cM>11){cM=0;cY++;}renderCal();}
+
+// FOCUS TIMER
+let timerInterval=null;
+let timerSeconds=25*60;
+let timerRunning=false;
+let timerMode=25;
+
+function setMode(btn,mins,label){
+  document.querySelectorAll('.tmode').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  timerMode=mins;
+  timerSeconds=mins*60;
+  timerRunning=false;
+  clearInterval(timerInterval);
+  document.getElementById('timerDisplay').textContent=pad(mins)+':00';
+  document.getElementById('timerLabel').textContent=label+' vaqti';
+  document.getElementById('timerBtn').textContent='▶ Boshlash';
+}
+function pad(n){return String(n).padStart(2,'0');}
+function updateTimerDisplay(){
+  const m=Math.floor(timerSeconds/60);
+  const s=timerSeconds%60;
+  document.getElementById('timerDisplay').textContent=pad(m)+':'+pad(s);
+}
+function timerToggle(){
+  if(timerRunning){
+    clearInterval(timerInterval);timerRunning=false;
+    document.getElementById('timerBtn').textContent='▶ Davom';
+  } else {
+    timerRunning=true;
+    document.getElementById('timerBtn').textContent='⏸ Pauza';
+    timerInterval=setInterval(()=>{
+      if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;document.getElementById('timerBtn').textContent='▶ Boshlash';alert('Vaqt tugadi! 🎉');return;}
+      timerSeconds--;updateTimerDisplay();
+    },1000);
+  }
+}
+function timerReset(){
+  clearInterval(timerInterval);timerRunning=false;
+  timerSeconds=timerMode*60;updateTimerDisplay();
+  document.getElementById('timerBtn').textContent='▶ Boshlash';
+}
+
+// AI PLAN
+function aiPlan(){
+  if(confirm('AI bugungi rejangizni tahlil qilib, takliflar bersinmi?')){
+    window.location.href='chat.html?q='+encodeURIComponent('Bugungi rejamni tahlil qil va optimallashtir: 5 ta vazifa bor, 3 tasi bajarildi.');
+  }
+}
+
+// INIT
+updateDateHeader();
+renderCal();
+updateProgress();
+</script>
+</body>
+</html>
