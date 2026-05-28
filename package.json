@@ -8,7 +8,7 @@
     "dev": "nodemon backend/server.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
