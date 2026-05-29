@@ -369,6 +369,7 @@ async function doLogin() {
             localStorage.setItem("userId", data.userId);
             localStorage.setItem("userEmail", data.email);
             localStorage.setItem("userType", data.userType || "personal");
+            localStorage.setItem("userName", data.name || data.email);
 
             showStep("step-success");
             document.getElementById("success-msg").textContent = "Dashboard ga o'tmoqdasiz...";
@@ -432,7 +433,9 @@ async function doRegister() {
 function showDemo() {
     localStorage.setItem("userId", "guest");
     localStorage.setItem("userType", "personal");
-    window.location.href = "dashboard.html";
+    const uType = localStorage.getItem("userType");
+window.location.href = uType === "business" ? "business-dashboard.html" : "dashboard.html";
+    
 }
 
 // NOTIFICATION
