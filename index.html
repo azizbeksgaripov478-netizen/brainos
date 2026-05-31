@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrainOS — Aqlli AI Yordamchi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="landing.css">
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2E7CF6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BrainOS">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
 </head>
 <body>
 
@@ -453,6 +460,13 @@ function showNotif(msg, type = "success") {
     `;
     document.body.appendChild(notif);
     setTimeout(() => notif.remove(), 3000);
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('BrainOS PWA ready!'))
+    .catch(e => console.log('SW error:', e));
 }
 </script>
 

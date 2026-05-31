@@ -187,6 +187,60 @@ async function saveMessage(userId, role, content) {
   await supabase.from("conversations").insert({ user_id: userId, role, content });
 }
 
+// STREAMING CHAT
+app.post("/chat/stream", rateLimit, async (req, res) => {
+  const { message, history = [], userId } = req.body;
+  if (!message?.trim()) return res.status(400).json({ error: "Xabar bo'sh" });
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  try {
+    const messages = [
+      ...history.slice(-10).map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content).slice(0, 2000),
+      })),
+      { role: "user", content: message.trim() },
+    ];
+
+    const stream = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 2048,
+      temperature: 0.7,
+      stream: true,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages,
+      ],
+    });
+
+    let fullReply = "";
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content || "";
+      if (delta) {
+        fullReply += delta;
+        res.write(`data: ${JSON.stringify({ text: delta })}\n\n`);
+      }
+    }
+
+    // Supabase ga saqlash
+    if (userId && userId !== "guest") {
+      await saveMessage(userId, "user", message.trim());
+      await saveMessage(userId, "assistant", fullReply);
+    }
+
+    res.write("data: [DONE]\n\n");
+    res.end();
+
+  } catch (err) {
+    console.error("[STREAM ERROR]", err.message);
+    res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+    res.end();
+  }
+});
+
 app.post("/chat", rateLimit, async (req, res) => {
   try {
     const { message, text, history = [], userId } = req.body;

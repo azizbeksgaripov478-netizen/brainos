@@ -1,0 +1,40 @@
+{
+  "name": "BrainOS — Aqlli AI Yordamchi",
+  "short_name": "BrainOS",
+  "description": "O'zbekistonning #1 AI platformasi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050A14",
+  "theme_color": "#2E7CF6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI Chat",
+      "short_name": "Chat",
+      "url": "/chat.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Kunlik Reja",
+      "short_name": "Reja",
+      "url": "/plan.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Qaydlar",
+      "short_name": "Notes",
+      "url": "/notes.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "uz"
+}
